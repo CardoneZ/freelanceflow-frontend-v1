@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreelanceFlow | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full mx-auto">
+        <!-- Logo and Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-check text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">FreelanceFlow</h1>
+            <p class="text-gray-600 mt-2">Sign in to manage your appointments</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Sign in to your account</h2>
+                
+                <!-- Error Message -->
+                <div id="error-message" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span id="error-text"></span>
+                    </div>
+                </div>
+                
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required 
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="you@example.com">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required 
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="••••••••">
+                            <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" 
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" id="login-button"
+                        class="w-full gradient-bg text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition duration-200 flex items-center justify-center">
+                        <span id="button-text">Sign in</span>
+                        <i id="button-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="bg-gray-50 px-8 py-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600 text-center">
+                    Don't have an account? 
+                    <a href="signup.html" class="font-medium text-indigo-600 hover:text-indigo-500">Sign up</a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <p>© 2023 FreelanceFlow. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script type="module">
+  import { login } from '../../assets/js/auth.js';
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = document.getElementById('login-button');
+    btn.disabled = true;
+    
+    try {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      const user = await login(email, password);
+      
+      // Redirección basada en rol
+      if (user.Role === 'professional') {
+        window.location.href = '/pages/auth/professional/professionalDashboard.html';
+      } else {
+        window.location.href = '/pages/auth/client/clientDashboard.html';
+      }
+    } catch (error) {
+      document.getElementById('error-text').textContent = error.message;
+      document.getElementById('error-message').classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Redirigir si ya está autenticado
+  if (localStorage.getItem('token')) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user.Role === 'professional') {
+      window.location.href = '/pages/auth/professional/professionalDashboard.html';
+    } else {
+      window.location.href = '/pages/auth/client/clientDashboard.html';
+    }
+  }
+</script>
+
+</body>
+
+<form id="login-form">
+  <input type="email" id="email" required>
+  <input type="password" id="password" required>
+  <button type="submit">Login</button>
+</form>
+
+<script type="module">
+  import { login } from './assets/js/auth.js';
+
+  document
+    .getElementById('login-form')
+    .addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const { Role } = await login(email, password);
+
+        // redirecciones
+        if (Role === 'professional') {
+          window.location.href = '/pages/auth/professional/professionalDashboard.html';
+        } else {
+          window.location.href = '/pages/auth/client/clientDashboard.html';
+        }
+      } catch (err) {
+        alert('Login failed: ' + err.message);
+      }
+    });
+</script>
+
+
+</html>

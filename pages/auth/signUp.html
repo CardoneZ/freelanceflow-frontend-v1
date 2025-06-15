@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreelanceFlow | Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .password-strength {
+            height: 4px;
+            transition: all 0.3s ease;
+        }
+        .strength-0 { width: 20%; background-color: #ef4444; }
+        .strength-1 { width: 40%; background-color: #f59e0b; }
+        .strength-2 { width: 60%; background-color: #f59e0b; }
+        .strength-3 { width: 80%; background-color: #10b981; }
+        .strength-4 { width: 100%; background-color: #10b981; }
+        .professional-fields { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full mx-auto">
+        <!-- Logo and Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-check text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">FreelanceFlow</h1>
+            <p class="text-gray-600 mt-2">Start managing your professional appointments</p>
+        </div>
+
+        <!-- Sign Up Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Create your account</h2>
+
+                <!-- Error Message -->
+                <div id="error-message" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span id="error-text"></span>
+                    </div>
+                </div>
+
+                <form id="signup-form" class="space-y-6">
+                    <!-- Role Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">I am signing up as:</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <input type="radio" id="professional" name="role" value="professional" class="hidden peer">
+                                <label for="professional" class="flex flex-col items-center p-4 border border-gray-300 rounded-lg cursor-pointer peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-colors">
+                                    <i class="fas fa-user-tie text-indigo-600 text-2xl mb-2"></i>
+                                    <span class="font-medium text-gray-700">Professional</span>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" id="client" name="role" value="client" class="hidden peer" checked>
+                                <label for="client" class="flex flex-col items-center p-4 border border-gray-300 rounded-lg cursor-pointer peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-colors">
+                                    <i class="fas fa-user text-indigo-600 text-2xl mb-2"></i>
+                                    <span class="font-medium text-gray-700">Client</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Name Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="John">
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="Doe">
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="you@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="phone" name="phone"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                            placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="••••••••">
+                            <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 flex items-center">
+                            <div id="password-strength" class="password-strength strength-0 rounded-full mr-2"></div>
+                            <span id="password-strength-text" class="text-xs text-gray-500">Weak password</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <p>Use at least 8 characters with a mix of letters, numbers & symbols</p>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="confirm-password" name="confirm-password" required
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Professional Fields -->
+                    <div id="professional-fields" class="professional-fields space-y-6">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Professional Title</label>
+                            <input type="text" id="title" name="title"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="e.g. Web Developer">
+                        </div>
+                        
+                        <div>
+                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                            <textarea id="bio" name="bio" rows="3"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="Tell us about your skills and experience"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="hourlyRate" class="block text-sm font-medium text-gray-700 mb-1">Hourly Rate ($)</label>
+                            <input type="number" id="hourlyRate" name="hourlyRate" min="0" step="5"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="50">
+                        </div>
+                        
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <input type="text" id="location" name="location"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus"
+                                placeholder="City, Country">
+                        </div>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="terms" name="terms" type="checkbox" required
+                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="terms" class="font-medium text-gray-700">I agree to the</label>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-500"> Terms of Service</a> and
+                            <a href="#" class="text-indigo-600 hover:text-indigo-500"> Privacy Policy</a>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="signup-button"
+                        class="w-full gradient-bg text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition duration-200 flex items-center justify-center">
+                        <span id="button-text">Create Account</span>
+                        <i id="button-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-gray-50 px-8 py-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600 text-center">
+                    Already have an account?
+                    <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">Sign in</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <p>© 2025 FreelanceFlow. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.getElementById('signup-form');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const signupButton = document.getElementById('signup-button');
+            const buttonText = document.getElementById('button-text');
+            const buttonSpinner = document.getElementById('button-spinner');
+            const togglePassword = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const passwordStrength = document.getElementById('password-strength');
+            const passwordStrengthText = document.getElementById('password-strength-text');
+            const professionalFields = document.getElementById('professional-fields');
+            const roleRadios = document.querySelectorAll('input[name="role"]');
+
+            // Toggle professional fields based on role selection
+            roleRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    professionalFields.style.display = 
+                        this.value === 'professional' ? 'block' : 'none';
+                });
+            });
+
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            // Password strength indicator
+            passwordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                let strength = 0;
+                
+                if (password.length >= 8) strength++;
+                if (password.length >= 12) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                
+                strength = Math.min(strength, 4);
+                passwordStrength.className = 'password-strength strength-' + strength + ' rounded-full mr-2';
+                
+                const strengthTexts = ['Very weak', 'Weak', 'Fair', 'Strong', 'Very strong'];
+                passwordStrengthText.textContent = strengthTexts[strength];
+                passwordStrengthText.className = 'text-xs ' + 
+                    (strength < 2 ? 'text-red-500' : 
+                     strength < 3 ? 'text-yellow-500' : 'text-green-500');
+            });
+
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Validate password match
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    showError("Passwords don't match");
+                    return;
+                }
+
+                // Validate password strength
+                if (passwordInput.value.length < 8) {
+                    showError("Password must be at least 8 characters");
+                    return;
+                }
+
+                // Validate terms checkbox
+                if (!document.getElementById('terms').checked) {
+                    showError("You must agree to the terms and conditions");
+                    return;
+                }
+
+                // Validate professional fields if professional is selected
+                const role = document.querySelector('input[name="role"]:checked').value;
+                if (role === 'professional') {
+                    const title = document.getElementById('title').value;
+                    const bio = document.getElementById('bio').value;
+                    const hourlyRate = document.getElementById('hourlyRate').value;
+                    const location = document.getElementById('location').value;
+                    
+                    if (!title || !bio || !hourlyRate || !location) {
+                        showError("All professional fields are required");
+                        return;
+                    }
+                }
+
+                // Show loading state
+                signupButton.disabled = true;
+                buttonText.textContent = 'Creating account...';
+                buttonSpinner.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+
+                // Prepare data for API
+                const formData = {
+                    Email: document.getElementById('email').value,
+                    Password: passwordInput.value,
+                    FirstName: document.getElementById('firstName').value,
+                    LastName: document.getElementById('lastName').value,
+                    Role: role,
+                    Phone: document.getElementById('phone').value
+                };
+
+                // Add professional fields if professional is selected
+                if (role === 'professional') {
+                    formData.Title = document.getElementById('title').value;
+                    formData.Bio = document.getElementById('bio').value;
+                    formData.HourlyRate = document.getElementById('hourlyRate').value;
+                    formData.Location = document.getElementById('location').value;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:4000/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Registration failed');
+                    }
+
+                    // Registration successful - store token and redirect
+                    localStorage.setItem('freelanceFlowToken', data.token);
+                    
+                    // Redirect based on role
+                    if (data.Role === 'professional') {
+                        window.location.href = '/pages/auth/professional/professionalDashboard.html';
+                    } else {
+                        window.location.href = '/pages/auth/client/clientDashboard.html';
+                    }
+
+                } catch (error) {
+                    showError(error.message || 'Registration failed. Please try again.');
+                    signupButton.disabled = false;
+                    buttonText.textContent = 'Create Account';
+                    buttonSpinner.classList.add('hidden');
+                }
+            });
+
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+                signupForm.classList.add('shake');
+                setTimeout(() => signupForm.classList.remove('shake'), 500);
+            }
+
+           // Check if already logged in (versión corregida)
+            async function checkAuthAndRedirect() {
+                if (localStorage.getItem('freelanceFlowToken')) {
+                    try {
+                        const response = await fetch('http://localhost:4000/api/auth/me', {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('freelanceFlowToken')}`
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const userData = await response.json();
+                            const redirectPath = userData.Role === 'professional' 
+                                ? '/professional-dashboard' 
+                                : '/client-dashboard';
+                            
+                            window.location.href = redirectPath;
+                        }
+                    } catch (error) {
+                        console.error('Error verifying token:', error);
+                        // Si hay error, borramos el token inválido
+                        localStorage.removeItem('freelanceFlowToken');
+                    }
+                }
+            }
+            
+            // Llamar a la función al cargar la página
+            document.addEventListener('DOMContentLoaded', function() {
+                checkAuthAndRedirect();
+            });
+        });
+    </script>
+</body>
+</html>
