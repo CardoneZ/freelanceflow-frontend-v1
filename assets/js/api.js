@@ -3,10 +3,22 @@ const API_BASE_URL = 'http://localhost:4000/api'; // Ajusta según tu configurac
 
 // Helper para manejar respuestas
 async function handleResponse(response) {
-  const data = await response.json();
+  let data = {};
+  try { data = await response.json(); } catch {  }
+
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    
+    if (response.status === 401) {
+      import('./utils/auth.js').then(m => m.clearAuth());
+      window.location.href = '/login.html';
+    }
+
+    const error = new Error(data.message || 'Request failed');
+    error.status = response.status;
+    error.data   = data;
+    throw error;
   }
+
   return data;
 }
 
@@ -165,25 +177,40 @@ export const availabilityAPI = {
 
 // Services API
 export const servicesAPI = {
-  async getAll(query = {}) {
-    const params = new URLSearchParams(query);
-    const response = await fetch(`${API_BASE_URL}/services?${params}`);
-    return handleResponse(response);
-  },
-
-  async create(serviceData) {
+    async create(serviceData) {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/services`, 
-      fetchConfig('POST', serviceData, {
-        'Authorization': `Bearer ${token}`
-      }));
-    return handleResponse(response);
+    const res = await fetch(
+      `${API_BASE_URL}/services`,
+      fetchConfig('POST', serviceData, { Authorization: `Bearer ${token}` })
+    );
+    return handleResponse(res);
   },
 
-  async validateDuration(serviceId, duration) {
-    const response = await fetch(`${API_BASE_URL}/services/${serviceId}/validate/${duration}`);
-    return handleResponse(response);
-  }
+
+  async update(serviceId, serviceData) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(
+      `${API_BASE_URL}/services/${serviceId}`,
+      fetchConfig('PUT', serviceData, { Authorization: `Bearer ${token}` })
+    );
+    return handleResponse(res);
+  },
+
+  
+  async remove(serviceId) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(
+      `${API_BASE_URL}/services/${serviceId}`,
+      fetchConfig('DELETE', null, { Authorization: `Bearer ${token}` })
+    );
+    return handleResponse(res);
+  },
+  
+ async getById(id) {
+    const res = await fetch(`${API_BASE_URL}/services/${id}`);
+    return handleResponse(res);
+  },
+
 };
 
 // Reviews API
@@ -203,14 +230,3 @@ export const reviewsAPI = {
     return handleResponse(response);
   }
 };
-
-// Helper para manejar errores
-export function handleApiError(error, elementId = 'error-message') {
-  console.error('API Error:', error);
-  const errorElement = document.getElementById(elementId);
-  if (errorElement) {
-    errorElement.textContent = error.message;
-    errorElement.classList.remove('hidden');
-  }
-  return Promise.reject(error);
-}

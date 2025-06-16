@@ -389,7 +389,6 @@
                         }
                     } catch (error) {
                         console.error('Error verifying token:', error);
-                        // Si hay error, borramos el token inválido
                         localStorage.removeItem('freelanceFlowToken');
                     }
                 }

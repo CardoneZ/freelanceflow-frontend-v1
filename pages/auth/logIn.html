@@ -101,12 +101,14 @@
         </div>
         
         <div class="mt-6 text-center text-sm text-gray-500">
-            <p>© 2023 FreelanceFlow. All rights reserved.</p>
+            <p>© 2025 FreelanceFlow. All rights reserved.</p>
         </div>
     </div>
 
     <script type="module">
-  import { login } from '../../assets/js/auth.js';
+  import { usersAPI, professionalsAPI, servicesAPI } from '../../assets/js/api.js';
+  import { getLoggedUser, clearAuth }             from '../../assets/utils/auth.js';
+
 
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
