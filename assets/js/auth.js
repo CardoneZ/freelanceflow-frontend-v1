@@ -1,30 +1,20 @@
+// assets/js/auth.js
 import { authAPI } from './api.js';
 
-export async function login(email, password) {
+export async function login(Email, Password) {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Email: email, Password: password })
-    });
+    const response = await authAPI.login(Email, Password);
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
-    }
-
-    const userData = await response.json();
-    
-    localStorage.setItem('token', userData.token);
+    localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify({
-      UserId: userData.UserId,
-      Email: userData.Email,
-      FirstName: userData.FirstName,
-      LastName: userData.LastName,
-      Role: userData.Role
+      UserId: response.UserId,
+      Email: response.Email,
+      FirstName: response.FirstName,
+      LastName: response.LastName,
+      Role: response.Role
     }));
     
-    return userData;
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     throw error;
@@ -34,7 +24,7 @@ export async function login(email, password) {
 export function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-  window.location.href = '/auth/login.html';
+  window.location.href = '/login.html';
 }
 
 export function getCurrentUser() {
@@ -44,4 +34,9 @@ export function getCurrentUser() {
 
 export function isAuthenticated() {
   return !!localStorage.getItem('token');
+}
+
+export function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
 }

@@ -218,7 +218,9 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { authAPI } from '../../assets/js/api.js';
+
         document.addEventListener('DOMContentLoaded', function() {
             const signupForm = document.getElementById('signup-form');
             const errorMessage = document.getElementById('error-message');
@@ -330,25 +332,14 @@
                 }
 
                 try {
-                    const response = await fetch('http://localhost:4000/api/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Registration failed');
-                    }
+                    const response = await authAPI.register(formData);
 
                     // Registration successful - store token and redirect
-                    localStorage.setItem('freelanceFlowToken', data.token);
+                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('user', JSON.stringify(response.user));
                     
                     // Redirect based on role
-                    if (data.Role === 'professional') {
+                    if (response.user.Role === 'professional') {
                         window.location.href = '/pages/auth/professional/professionalDashboard.html';
                     } else {
                         window.location.href = '/pages/auth/client/clientDashboard.html';
@@ -369,35 +360,22 @@
                 setTimeout(() => signupForm.classList.remove('shake'), 500);
             }
 
-           // Check if already logged in (versión corregida)
-            async function checkAuthAndRedirect() {
-                if (localStorage.getItem('freelanceFlowToken')) {
-                    try {
-                        const response = await fetch('http://localhost:4000/api/auth/me', {
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('freelanceFlowToken')}`
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            const userData = await response.json();
-                            const redirectPath = userData.Role === 'professional' 
-                                ? '/professional-dashboard' 
-                                : '/client-dashboard';
-                            
-                            window.location.href = redirectPath;
-                        }
-                    } catch (error) {
-                        console.error('Error verifying token:', error);
-                        localStorage.removeItem('freelanceFlowToken');
+            // Check if already logged in
+            function checkAuthAndRedirect() {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (user) {
+                        const redirectPath = user.Role === 'professional' 
+                            ? '/pages/auth/professional/professionalDashboard.html'
+                            : '/pages/auth/client/clientDashboard.html';
+                        window.location.href = redirectPath;
                     }
                 }
             }
-            
-            // Llamar a la función al cargar la página
-            document.addEventListener('DOMContentLoaded', function() {
-                checkAuthAndRedirect();
-            });
+
+            // Check auth on page load
+            checkAuthAndRedirect();
         });
     </script>
 </body>

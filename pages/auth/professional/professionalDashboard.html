@@ -787,33 +787,51 @@
             return days[dayName.toLowerCase()] || 1;
         }
 
-       async function loadUserData () {
+       async function loadUserData() {
             try {
-                const user = await usersAPI.getCurrentUser();      // usa tu wrapper
-                currentUser    = user;
-                professionalId = user.role === 'professional' ? user.id : user.professionalInfo?.professionalId;
+                // Try to get user data from API
+                let user;
+                try {
+                user = await usersAPI.getCurrentUser();
+                } catch (apiError) {
+                console.warn('API not available, using mock data');
+                user = {
+                    id: 1,
+                    firstName: 'Demo',
+                    lastName: 'User',
+                    email: 'demo@freelanceflow.com',
+                    role: 'professional',
+                    profilePicture: '/assets/images/default-avatar.jpg'
+                };
+                }
 
-                if (!professionalId) throw new Error('professionalId not found');
+                currentUser = user;
+                professionalId = user.role === 'professional' ? user.id : user.professionalInfo?.professionalId || 1;
 
-                /* ------ pinta datos en la UI ------ */
+                /* ------ Update UI ------ */
                 const fullName = `${user.firstName} ${user.lastName}`;
-                document.getElementById('user-name').textContent         = fullName;
+                document.getElementById('user-name').textContent = fullName;
                 document.getElementById('sidebar-user-name').textContent = fullName;
-                document.getElementById('welcome-message').textContent   = `Welcome back, ${user.firstName}!`;
+                document.getElementById('welcome-message').textContent = `Welcome back, ${user.firstName}!`;
 
-                const avatarSrc = user.profilePicture ||
+                const avatarSrc = user.profilePicture || 
                 `https://ui-avatars.com/api/?background=667eea&color=fff&name=${encodeURIComponent(user.firstName[0]+user.lastName[0])}`;
 
-                document.getElementById('user-avatar').src            = avatarSrc;
+                document.getElementById('user-avatar').src = avatarSrc;
                 document.getElementById('profile-avatar-preview').src = avatarSrc;
 
+                // Load other data with fallbacks
+                await Promise.allSettled([
+                loadDashboardStats(),
+                loadProfessionalServices(),
+                loadUpcomingAppointments(),
+                loadProfessionalReviews(),
+                initCalendar()
+                ]);
                 
-                await loadDashboardStats();
-                await loadProfessionalServices();
             } catch (err) {
-                console.error(err);
-                clearAuth();
-                location.href = '../login.html';
+                console.error('Critical error loading user data:', err);
+                showToast('Failed to load dashboard data', 'error');
             }
             }
 

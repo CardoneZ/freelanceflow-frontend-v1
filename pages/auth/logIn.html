@@ -106,79 +106,78 @@
     </div>
 
     <script type="module">
-  import { usersAPI, professionalsAPI, servicesAPI } from '../../assets/js/api.js';
-  import { getLoggedUser, clearAuth }             from '../../assets/utils/auth.js';
+        import { login } from '../../assets/js/auth.js';
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const loginButton = document.getElementById('login-button');
+            const buttonText = document.getElementById('button-text');
+            const buttonSpinner = document.getElementById('button-spinner');
+            const togglePassword = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
 
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const btn = document.getElementById('login-button');
-    btn.disabled = true;
-    
-    try {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      const user = await login(email, password);
-      
-      // Redirección basada en rol
-      if (user.Role === 'professional') {
-        window.location.href = '/pages/auth/professional/professionalDashboard.html';
-      } else {
-        window.location.href = '/pages/auth/client/clientDashboard.html';
-      }
-    } catch (error) {
-      document.getElementById('error-text').textContent = error.message;
-      document.getElementById('error-message').classList.remove('hidden');
-    } finally {
-      btn.disabled = false;
-    }
-  });
+            // Toggle password visibility
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
 
-  // Redirigir si ya está autenticado
-  if (localStorage.getItem('token')) {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user.Role === 'professional') {
-      window.location.href = '/pages/auth/professional/professionalDashboard.html';
-    } else {
-      window.location.href = '/pages/auth/client/clientDashboard.html';
-    }
-  }
-</script>
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                loginButton.disabled = true;
+                buttonText.textContent = 'Signing in...';
+                buttonSpinner.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
 
+                const Email = document.getElementById('email').value;
+                const Password = document.getElementById('password').value;
+
+                try {
+                    const user = await login(Email, Password);
+                    
+                    // Redirect based on role
+                    if (user.Role === 'professional') {
+                        window.location.href = '/pages/auth/professional/professionalDashboard.html';
+                    } else {
+                        window.location.href = '/pages/auth/client/clientDashboard.html';
+                    }
+                } catch (error) {
+                    // Show error
+                    errorText.textContent = error.message || 'Login failed. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                    loginForm.classList.add('shake');
+                    setTimeout(() => loginForm.classList.remove('shake'), 500);
+                } finally {
+                    // Reset button state
+                    loginButton.disabled = false;
+                    buttonText.textContent = 'Sign in';
+                    buttonSpinner.classList.add('hidden');
+                }
+            });
+
+            // Check if already logged in
+            function checkAuthAndRedirect() {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (user) {
+                        const redirectPath = user.Role === 'professional' 
+                            ? '/pages/auth/professional/professionalDashboard.html'
+                            : '/pages/auth/client/clientDashboard.html';
+                        window.location.href = redirectPath;
+                    }
+                }
+            }
+
+            // Check auth on page load
+            checkAuthAndRedirect();
+        });
+    </script>
 </body>
-
-<form id="login-form">
-  <input type="email" id="email" required>
-  <input type="password" id="password" required>
-  <button type="submit">Login</button>
-</form>
-
-<script type="module">
-  import { login } from './assets/js/auth.js';
-
-  document
-    .getElementById('login-form')
-    .addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      try {
-        const { Role } = await login(email, password);
-
-        // redirecciones
-        if (Role === 'professional') {
-          window.location.href = '/pages/auth/professional/professionalDashboard.html';
-        } else {
-          window.location.href = '/pages/auth/client/clientDashboard.html';
-        }
-      } catch (err) {
-        alert('Login failed: ' + err.message);
-      }
-    });
-</script>
-
-
 </html>
