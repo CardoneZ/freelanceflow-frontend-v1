@@ -7,6 +7,7 @@
   <title>FreelanceFlow | Appointments</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
   <style>
     .smooth-transition { transition: all 0.3s ease; }
@@ -29,12 +30,49 @@
 
   <!-- Navbar -->
   <nav class="bg-white shadow-sm fixed w-full z-10">
-    <!-- mismo contenido que en dashboard.html -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex-shrink-0 flex items-center">
+            <img class="h-8 w-auto" src="/assets/images/logo.png" alt="FreelanceFlow">
+          </div>
+        </div>
+        <div class="flex items-center pr-4">
+          <div class="ml-4 flex items-center md:ml-6">
+            <div class="ml-3 relative">
+              <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open user menu</span>
+                <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
+                <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
+              </button>
+              <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </nav>
 
   <!-- Sidebar -->
   <div class="sidebar bg-white w-64 fixed h-full shadow-md overflow-y-auto">
-    <!-- copiar sidebar de dashboard.html, marcando Appointments como activo -->
+    <div class="flex items-center justify-center h-16 border-b">
+      <span class="text-xl font-semibold text-gray-700">FreelanceFlow</span>
+    </div>
+    <div class="mt-6 px-4">
+      <div class="flex items-center px-4 py-3 bg-indigo-50 rounded-lg">
+        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-700" id="sidebar-user-name">Loading...</p>
+          <p class="text-xs text-gray-500">Professional</p>
+        </div>
+      </div>
+    </div>
     <nav class="mt-6">
       <a href="dashboard.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
         <i class="fas fa-tachometer-alt mr-3 text-gray-500"></i>Dashboard
@@ -42,7 +80,24 @@
       <a href="appointments.html" class="flex items-center px-6 py-3 text-sm font-medium text-indigo-700 bg-indigo-50 border-l-4 border-indigo-500">
         <i class="far fa-calendar-alt mr-3 text-indigo-500"></i>Appointments
       </a>
-      <!-- resto de enlaces -->
+      <a href="services.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-tasks mr-3 text-gray-500"></i>Services
+      </a>
+      <a href="availability.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="far fa-clock mr-3 text-gray-500"></i>Availability
+      </a>
+      <a href="reviews.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="far fa-star mr-3 text-gray-500"></i>Reviews
+      </a>
+      <div class="px-6 py-4 border-t mt-4">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Settings</p>
+        <a href="#" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+          <i class="fas fa-cog mr-3 text-gray-500"></i>Settings
+        </a>
+        <a href="#" id="sidebar-logout-btn" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+          <i class="fas fa-sign-out-alt mr-3 text-gray-500"></i>Sign Out
+        </a>
+      </div>
     </nav>
   </div>
 
@@ -101,138 +156,77 @@
     </div>
   </div>
 
-     <!-- Appointment Details Modal -->
-    <div id="appointment-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
-        <!-- Header -->
-        <div class="px-4 py-3 border-b flex justify-between items-center">
-            <h2 id="modal-title" class="text-lg font-semibold text-gray-800">Detalles de la cita</h2>
-            <button id="modal-close-btn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-            <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <!-- Body -->
-        <div class="px-6 py-4 space-y-3">
-            <p><span class="font-medium">Cliente:</span> <span id="modal-client">—</span></p>
-            <p><span class="font-medium">Servicio:</span> <span id="modal-service">—</span></p>
-            <p><span class="font-medium">Fecha:</span> <span id="modal-date">—</span></p>
-            <p><span class="font-medium">Hora:</span> <span id="modal-time">—</span></p>
-            <p><span class="font-medium">Estado:</span> <span id="modal-status" class="uppercase">—</span></p>
-        </div>
-        <!-- Footer -->
-        <div class="px-6 py-3 border-t flex justify-end space-x-2">
-            <button id="modal-confirm-btn" class="appointment-action hidden bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-                    data-action="confirm" data-id="">
-            Confirmar
-            </button>
-            <button id="modal-complete-btn" class="appointment-action hidden bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                    data-action="complete" data-id="">
-            Completar
-            </button>
-            <button id="modal-cancel-btn" class="appointment-action hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                    data-action="cancel" data-id="">
-            Cancelar
-            </button>
-        </div>
-        </div>
+  <!-- Appointment Details Modal -->
+  <div id="appointment-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
+      <!-- Header -->
+      <div class="px-4 py-3 border-b flex justify-between items-center">
+        <h2 id="modal-title" class="text-lg font-semibold text-gray-800">Appointment Details</h2>
+        <button id="modal-close-btn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <!-- Body -->
+      <div class="px-6 py-4 space-y-3">
+        <p><span class="font-medium">Client:</span> <span id="modal-client">—</span></p>
+        <p><span class="font-medium">Service:</span> <span id="modal-service">—</span></p>
+        <p><span class="font-medium">Date:</span> <span id="modal-date">—</span></p>
+        <p><span class="font-medium">Time:</span> <span id="modal-time">—</span></p>
+        <p><span class="font-medium">Status:</span> <span id="modal-status" class="uppercase">—</span></p>
+      </div>
+      <!-- Footer -->
+      <div class="px-6 py-3 border-t flex justify-end space-x-2">
+        <button id="modal-confirm-btn" class="appointment-action hidden bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                data-action="confirm" data-id="">
+          Confirm
+        </button>
+        <button id="modal-complete-btn" class="appointment-action hidden bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                data-action="complete" data-id="">
+          Complete
+        </button>
+        <button id="modal-cancel-btn" class="appointment-action hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                data-action="cancel" data-id="">
+          Cancel
+        </button>
+      </div>
     </div>
-
-    <script type="module">
-        import { appointmentsAPI } from '/assets/js/api.js';
-        import { formatDate, formatTime, showToast } from '/assets/js/utils.js';
-        import { loadUpcomingAppointments } from '/assets/js/modules/appointments.js';
-
-        // Referencias al DOM
-        const modal = document.getElementById('appointment-modal');
-        const closeBtn = document.getElementById('modal-close-btn');
-        const fldClient = document.getElementById('modal-client');
-        const fldService = document.getElementById('modal-service');
-        const fldDate    = document.getElementById('modal-date');
-        const fldTime    = document.getElementById('modal-time');
-        const fldStatus  = document.getElementById('modal-status');
-        const btnConfirm = document.getElementById('modal-confirm-btn');
-        const btnComplete= document.getElementById('modal-complete-btn');
-        const btnCancel  = document.getElementById('modal-cancel-btn');
-
-        // Abre el modal con datos de la cita
-        async function openAppointmentModal(id) {
-        try {
-            const appt = await appointmentsAPI.getById(id);
-            fldClient.textContent  = appt.clientName;
-            fldService.textContent = appt.serviceName;
-            fldDate.textContent    = formatDate(appt.startTime);
-            fldTime.textContent    = `${formatTime(appt.startTime)} - ${formatTime(appt.endTime)}`;
-            fldStatus.textContent  = appt.status;
-
-            // Ajusta visibilidad de botones según estado
-            btnConfirm.hidden  = appt.status !== 'pending';
-            btnComplete.hidden = appt.status !== 'confirmed';
-            btnCancel.hidden   = (appt.status === 'cancelled' || appt.status === 'completed');
-
-            // Asigna el mismo ID a cada botón
-            [btnConfirm, btnComplete, btnCancel].forEach(b => b.dataset.id = id);
-
-            modal.classList.remove('hidden');
-        } catch (err) {
-            console.error(err);
-            showToast('Error al cargar detalles de la cita', 'error');
-        }
-        }
-
-        // Cierra modal
-        function closeAppointmentModal() {
-        modal.classList.add('hidden');
-        }
-
-        // Maneja clic en cualquier fila de cita
-        document.getElementById('appointments-list').addEventListener('click', e => {
-        const row = e.target.closest('tr[data-id]');
-        if (!row) return;
-        openAppointmentModal(row.dataset.id);
-        });
-
-        // Botón cerrar
-        closeBtn.addEventListener('click', closeAppointmentModal);
-
-        // Cerrar al hacer clic afuera del contenido
-        modal.addEventListener('click', e => {
-        if (e.target === modal) closeAppointmentModal();
-        });
-
-        // Reusa tu handler de acciones (confirmar, cancelar, completar)
-        async function handleModalAction(e) {
-        const action = e.target.dataset.action;
-        const id     = e.target.dataset.id;
-        try {
-            switch (action) {
-            case 'confirm':  await appointmentsAPI.confirm(id);   break;
-            case 'complete': await appointmentsAPI.complete(id);  break;
-            case 'cancel':   await appointmentsAPI.cancel(id);    break;
-            }
-            showToast(`Cita ${action}ada con éxito`, 'success');
-            closeAppointmentModal();
-            await loadUpcomingAppointments();  // refresca lista
-        } catch {
-            showToast(`No se pudo ${action} la cita`, 'error');
-        }
-        }
-        [btnConfirm, btnComplete, btnCancel].forEach(b => {
-        b.addEventListener('click', handleModalAction);
-        });
-    </script>
+  </div>
 
   <script type="module">
     import { initAppointments } from '/assets/js/modules/appointments.js';
     import { getCurrentUser, logout } from '/assets/js/auth.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // misma lógica de navbar/sidebar que en services.html...
-      // ...
-      // Load user
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+      });
+      
+      // User dropdown
+      document.getElementById('user-menu-button').addEventListener('click', () => {
+        document.querySelector('[role="menu"]').classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', event => {
+        if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+          document.querySelector('[role="menu"]').classList.add('hidden');
+        }
+      });
+      
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
       const user = getCurrentUser();
       if (!user) { window.location.href = '/login.html'; return; }
-      // actualiza nombre/avatar...
-      // Inicializa citas
+      
+      document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
+      document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
+      
+      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
+      document.getElementById('user-avatar-img').src = avatarUrl;
+      document.getElementById('sidebar-user-avatar').src = avatarUrl;
+      
       initAppointments();
     });
   </script>

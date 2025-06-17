@@ -109,9 +109,11 @@ async function saveService() {
         }
         
         document.getElementById('service-modal').classList.add('hidden');
+        form.reset();
         await loadServices();
     } catch (error) {
-        showToast('Error saving service', 'error');
+        console.error('Error saving service:', error);
+        showToast('Error saving service: ' + (error.message || 'Unknown error'), 'error');
     }
 }
 

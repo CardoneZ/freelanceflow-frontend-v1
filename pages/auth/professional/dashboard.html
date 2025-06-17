@@ -5,9 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FreelanceFlow | Dashboard</title>
-  <script src="https://cdn.tailwindcss.com">
-    window.API_BASE_URL = 'http://127.0.0.1:4000/api';
-  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .smooth-transition { transition: all 0.3s ease; }
@@ -119,12 +117,12 @@
       <!-- Page Heading -->
       <div class="py-6">
         <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        <p class="mt-1 text-sm text-gray-500" id="welcome-message">Cargando...</p>
+        <p class="mt-1 text-sm text-gray-500" id="welcome-message">Loading...</p>
       </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8" id="stats-cards">
-        <!-- Se cargarán dinámicamente -->
+        <!-- Will be loaded dynamically -->
       </div>
 
       <!-- Main Grid -->
@@ -132,14 +130,14 @@
         <!-- Upcoming Appointments -->
         <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
           <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Próximas Citas</h3>
-            <p class="mt-1 text-sm text-gray-500">Tus siguientes 5 citas</p>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Appointments</h3>
+            <p class="mt-1 text-sm text-gray-500">Your next 5 appointments</p>
           </div>
           <ul class="divide-y divide-gray-200" id="upcoming-appointments">
-            <li class="p-4 text-center text-gray-500">Cargando citas...</li>
+            <li class="p-4 text-center text-gray-500">Loading appointments...</li>
           </ul>
           <div class="px-4 py-4 bg-gray-50 text-right sm:px-6">
-            <a href="appointments.html" class="text-sm text-indigo-600 font-medium hover:underline">Ver todas</a>
+            <a href="appointments.html" class="text-sm text-indigo-600 font-medium hover:underline">View all</a>
           </div>
         </div>
 
@@ -148,26 +146,26 @@
           <!-- Recent Reviews -->
           <div class="bg-white shadow rounded-lg overflow-hidden">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-              <h3 class="text-lg font-medium text-gray-900">Últimas Reseñas</h3>
+              <h3 class="text-lg font-medium text-gray-900">Recent Reviews</h3>
             </div>
             <ul class="divide-y divide-gray-200" id="recent-reviews">
-              <li class="p-4 text-center text-gray-500">Cargando reseñas...</li>
+              <li class="p-4 text-center text-gray-500">Loading reviews...</li>
             </ul>
             <div class="px-4 py-4 bg-gray-50 text-right sm:px-6">
-              <a href="reviews.html" class="text-sm text-indigo-600 font-medium hover:underline">Ver todas</a>
+              <a href="reviews.html" class="text-sm text-indigo-600 font-medium hover:underline">View all</a>
             </div>
           </div>
 
           <!-- My Services -->
           <div class="bg-white shadow rounded-lg overflow-hidden">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
-              <h3 class="text-lg font-medium text-gray-900">Mis Servicios</h3>
+              <h3 class="text-lg font-medium text-gray-900">My Services</h3>
               <a href="services.html" class="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">
-                Administrar
+                Manage
               </a>
             </div>
             <ul class="divide-y divide-gray-200" id="my-services">
-              <li class="p-4 text-center text-gray-500">Cargando servicios...</li>
+              <li class="p-4 text-center text-gray-500">Loading services...</li>
             </ul>
           </div>
         </div>
@@ -175,11 +173,33 @@
     </div>
   </div>
 
-  <!-- Dashboard Initialization Script -->
   <script type="module">
-    import { initDashboard } from '../../../assets/js/modules/dashboard.js';
-    document.addEventListener('DOMContentLoaded', initDashboard);
-  </script>
+    import { initDashboard } from '/assets/js/modules/dashboard.js';
+    import { getCurrentUser, logout } from '/assets/js/auth.js';
 
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+      });
+      
+      // User dropdown
+      document.getElementById('user-menu-button').addEventListener('click', () => {
+        document.querySelector('[role="menu"]').classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', event => {
+        if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+          document.querySelector('[role="menu"]').classList.add('hidden');
+        }
+      });
+      
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
+      initDashboard();
+    });
+  </script>
 </body>
 </html>
