@@ -340,7 +340,7 @@
                     
                     // Redirect based on role
                     if (response.user.Role === 'professional') {
-                        window.location.href = '/pages/auth/professional/professionalDashboard.html';
+                        window.location.href = '/pages/auth/professional/dashboard.html';
                     } else {
                         window.location.href = '/pages/auth/client/clientDashboard.html';
                     }
@@ -367,7 +367,7 @@
                     const user = JSON.parse(localStorage.getItem('user'));
                     if (user) {
                         const redirectPath = user.Role === 'professional' 
-                            ? '/pages/auth/professional/professionalDashboard.html'
+                            ? '/pages/auth/professional/dashboard.html'
                             : '/pages/auth/client/clientDashboard.html';
                         window.location.href = redirectPath;
                     }

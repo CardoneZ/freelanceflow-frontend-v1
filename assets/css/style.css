@@ -1,0 +1,32 @@
+/* assets/css/styles.css */
+.smooth-transition {
+  transition: all 0.3s ease;
+}
+
+.sidebar {
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .sidebar { 
+    transform: translateX(-100%); 
+    position: fixed; 
+    z-index: 50; 
+    height: 100vh; 
+  }
+  .sidebar.open { transform: translateX(0); }
+}
+
+/* Animation for loading */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

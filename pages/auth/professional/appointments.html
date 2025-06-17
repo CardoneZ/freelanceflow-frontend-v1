@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceFlow | Appointments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <style>
+    .smooth-transition { transition: all 0.3s ease; }
+    .sidebar { transition: transform 0.3s ease; }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
+    .fc-daygrid-day-frame { min-height: 100px; }
+    .fc-event { cursor: pointer; font-size: 0.85em; padding: 2px 5px; }
+    .fc-timegrid-slots td { height: 40px; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm fixed w-full z-10">
+    <!-- mismo contenido que en dashboard.html -->
+  </nav>
+
+  <!-- Sidebar -->
+  <div class="sidebar bg-white w-64 fixed h-full shadow-md overflow-y-auto">
+    <!-- copiar sidebar de dashboard.html, marcando Appointments como activo -->
+    <nav class="mt-6">
+      <a href="dashboard.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-tachometer-alt mr-3 text-gray-500"></i>Dashboard
+      </a>
+      <a href="appointments.html" class="flex items-center px-6 py-3 text-sm font-medium text-indigo-700 bg-indigo-50 border-l-4 border-indigo-500">
+        <i class="far fa-calendar-alt mr-3 text-indigo-500"></i>Appointments
+      </a>
+      <!-- resto de enlaces -->
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+
+      <!-- Heading -->
+      <div class="py-6 flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-900">Appointments</h1>
+        <button id="refresh-appointments" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+          <i class="fas fa-sync-alt mr-2"></i> Refresh
+        </button>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Manage your upcoming and past appointments</p>
+
+      <!-- Calendar -->
+      <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+        <div id="calendar" class="p-4"></div>
+      </div>
+
+      <!-- Appointments List -->
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">All Appointments</h3>
+          <p class="mt-1 text-sm text-gray-500">List of all your appointments</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date &amp; Time</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appointments-list" class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading appointments...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-4 py-4 bg-gray-50 text-right sm:px-6">
+          <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500" id="appointments-count">Showing 0 appointments</div>
+            <div class="flex space-x-2">
+              <button id="prev-page" class="px-3 py-1 border rounded-md text-gray-700 bg-white disabled:opacity-50">Previous</button>
+              <button id="next-page" class="px-3 py-1 border rounded-md text-gray-700 bg-white disabled:opacity-50">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+     <!-- Appointment Details Modal -->
+    <div id="appointment-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
+        <!-- Header -->
+        <div class="px-4 py-3 border-b flex justify-between items-center">
+            <h2 id="modal-title" class="text-lg font-semibold text-gray-800">Detalles de la cita</h2>
+            <button id="modal-close-btn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+            <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Body -->
+        <div class="px-6 py-4 space-y-3">
+            <p><span class="font-medium">Cliente:</span> <span id="modal-client">—</span></p>
+            <p><span class="font-medium">Servicio:</span> <span id="modal-service">—</span></p>
+            <p><span class="font-medium">Fecha:</span> <span id="modal-date">—</span></p>
+            <p><span class="font-medium">Hora:</span> <span id="modal-time">—</span></p>
+            <p><span class="font-medium">Estado:</span> <span id="modal-status" class="uppercase">—</span></p>
+        </div>
+        <!-- Footer -->
+        <div class="px-6 py-3 border-t flex justify-end space-x-2">
+            <button id="modal-confirm-btn" class="appointment-action hidden bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                    data-action="confirm" data-id="">
+            Confirmar
+            </button>
+            <button id="modal-complete-btn" class="appointment-action hidden bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                    data-action="complete" data-id="">
+            Completar
+            </button>
+            <button id="modal-cancel-btn" class="appointment-action hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                    data-action="cancel" data-id="">
+            Cancelar
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { appointmentsAPI } from '/assets/js/api.js';
+        import { formatDate, formatTime, showToast } from '/assets/js/utils.js';
+        import { loadUpcomingAppointments } from '/assets/js/modules/appointments.js';
+
+        // Referencias al DOM
+        const modal = document.getElementById('appointment-modal');
+        const closeBtn = document.getElementById('modal-close-btn');
+        const fldClient = document.getElementById('modal-client');
+        const fldService = document.getElementById('modal-service');
+        const fldDate    = document.getElementById('modal-date');
+        const fldTime    = document.getElementById('modal-time');
+        const fldStatus  = document.getElementById('modal-status');
+        const btnConfirm = document.getElementById('modal-confirm-btn');
+        const btnComplete= document.getElementById('modal-complete-btn');
+        const btnCancel  = document.getElementById('modal-cancel-btn');
+
+        // Abre el modal con datos de la cita
+        async function openAppointmentModal(id) {
+        try {
+            const appt = await appointmentsAPI.getById(id);
+            fldClient.textContent  = appt.clientName;
+            fldService.textContent = appt.serviceName;
+            fldDate.textContent    = formatDate(appt.startTime);
+            fldTime.textContent    = `${formatTime(appt.startTime)} - ${formatTime(appt.endTime)}`;
+            fldStatus.textContent  = appt.status;
+
+            // Ajusta visibilidad de botones según estado
+            btnConfirm.hidden  = appt.status !== 'pending';
+            btnComplete.hidden = appt.status !== 'confirmed';
+            btnCancel.hidden   = (appt.status === 'cancelled' || appt.status === 'completed');
+
+            // Asigna el mismo ID a cada botón
+            [btnConfirm, btnComplete, btnCancel].forEach(b => b.dataset.id = id);
+
+            modal.classList.remove('hidden');
+        } catch (err) {
+            console.error(err);
+            showToast('Error al cargar detalles de la cita', 'error');
+        }
+        }
+
+        // Cierra modal
+        function closeAppointmentModal() {
+        modal.classList.add('hidden');
+        }
+
+        // Maneja clic en cualquier fila de cita
+        document.getElementById('appointments-list').addEventListener('click', e => {
+        const row = e.target.closest('tr[data-id]');
+        if (!row) return;
+        openAppointmentModal(row.dataset.id);
+        });
+
+        // Botón cerrar
+        closeBtn.addEventListener('click', closeAppointmentModal);
+
+        // Cerrar al hacer clic afuera del contenido
+        modal.addEventListener('click', e => {
+        if (e.target === modal) closeAppointmentModal();
+        });
+
+        // Reusa tu handler de acciones (confirmar, cancelar, completar)
+        async function handleModalAction(e) {
+        const action = e.target.dataset.action;
+        const id     = e.target.dataset.id;
+        try {
+            switch (action) {
+            case 'confirm':  await appointmentsAPI.confirm(id);   break;
+            case 'complete': await appointmentsAPI.complete(id);  break;
+            case 'cancel':   await appointmentsAPI.cancel(id);    break;
+            }
+            showToast(`Cita ${action}ada con éxito`, 'success');
+            closeAppointmentModal();
+            await loadUpcomingAppointments();  // refresca lista
+        } catch {
+            showToast(`No se pudo ${action} la cita`, 'error');
+        }
+        }
+        [btnConfirm, btnComplete, btnCancel].forEach(b => {
+        b.addEventListener('click', handleModalAction);
+        });
+    </script>
+
+  <script type="module">
+    import { initAppointments } from '/assets/js/modules/appointments.js';
+    import { getCurrentUser, logout } from '/assets/js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // misma lógica de navbar/sidebar que en services.html...
+      // ...
+      // Load user
+      const user = getCurrentUser();
+      if (!user) { window.location.href = '/login.html'; return; }
+      // actualiza nombre/avatar...
+      // Inicializa citas
+      initAppointments();
+    });
+  </script>
+</body>
+</html>

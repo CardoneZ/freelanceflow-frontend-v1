@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceFlow | Services</title>
+  <script src="https://cdn.tailwindcss.com">
+    window.API_BASE_URL = 'http://127.0.0.1:4000/api';
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .smooth-transition { transition: all 0.3s ease; }
+    .sidebar { transition: transform 0.3s ease; }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm fixed w-full z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex-shrink-0 flex items-center">
+            <img class="h-8 w-auto" src="/assets/images/logo.png" alt="FreelanceFlow">
+          </div>
+        </div>
+        <div class="flex items-center">
+          <div class="ml-4 flex items-center md:ml-6">
+            <button type="button" class="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <span class="sr-only">View notifications</span>
+              <div class="relative">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">3</span>
+              </div>
+            </button>
+            <div class="ml-3 relative">
+              <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open user menu</span>
+                <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
+                <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
+              </button>
+              <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu">
+                <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <div class="sidebar bg-white w-64 fixed h-full shadow-md overflow-y-auto">
+    <div class="flex items-center justify-center h-16 border-b">
+      <span class="text-xl font-semibold text-gray-700">FreelanceFlow</span>
+    </div>
+    <div class="mt-6 px-4">
+      <div class="flex items-center px-4 py-3 bg-indigo-50 rounded-lg">
+        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-700" id="sidebar-user-name">Loading...</p>
+          <p class="text-xs text-gray-500">Professional</p>
+        </div>
+      </div>
+    </div>
+    <nav class="mt-6">
+      <a href="dashboard.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-tachometer-alt mr-3 text-gray-500"></i>Dashboard
+      </a>
+      <a href="appointments.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="far fa-calendar-alt mr-3 text-gray-500"></i>Appointments
+      </a>
+      <a href="clients.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-users mr-3 text-gray-500"></i>Clients
+      </a>
+      <a href="services.html" class="flex items-center px-6 py-3 text-sm font-medium text-indigo-700 bg-indigo-50 border-l-4 border-indigo-500">
+        <i class="fas fa-tasks mr-3 text-indigo-500"></i>Services
+      </a>
+      <a href="availability.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="far fa-clock mr-3 text-gray-500"></i>Availability
+      </a>
+      <a href="reviews.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+        <i class="far fa-star mr-3 text-gray-500"></i>Reviews
+      </a>
+      <div class="px-6 py-4 border-t mt-4">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Settings</p>
+        <a href="profile.html" class="flex items-center px-2 py-2 mt-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+          <i class="fas fa-user mr-3 text-gray-500"></i>Profile
+        </a>
+        <a href="#" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+          <i class="fas fa-cog mr-3 text-gray-500"></i>Settings
+        </a>
+        <a href="#" id="sidebar-logout-btn" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+          <i class="fas fa-sign-out-alt mr-3 text-gray-500"></i>Sign Out
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <!-- Heading -->
+      <div class="py-6 flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-900">Services</h1>
+        <button id="add-service" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+          <i class="fas fa-plus mr-2"></i> Add Service
+        </button>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Manage the services you offer to clients</p>
+
+      <!-- Services Table -->
+      <div class="bg-white shadow rounded-lg overflow-hidden mt-4">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="services-list" class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading services...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-4 py-4 bg-gray-50 text-right sm:px-6">
+          <div class="text-sm text-gray-500" id="services-count">Showing 0 services</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Service Modal -->
+  <div id="service-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-3 border-b flex justify-between items-center">
+            <h2 id="service-modal-title" class="text-lg font-semibold text-gray-800">Agregar servicio</h2>
+            <button id="service-modal-close" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
+            </div>
+            <!-- Form -->
+            <form id="service-form" class="px-6 py-4 space-y-4" data-id="">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 rounded-md p-2" required>
+            </div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea id="description" name="description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
+            </div>
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700">Precio ($/h)</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" class="mt-1 block w-full border border-gray-300 rounded-md p-2" required>
+            </div>
+            <div>
+                <label for="duration" class="block text-sm font-medium text-gray-700">Duración base (min)</label>
+                <input type="number" id="duration" name="duration" min="0" class="mt-1 block w-full border border-gray-300 rounded-md p-2" required>
+            </div>
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-2 pt-4 border-t">
+                <button type="button" id="save-service" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                Guardar
+                </button>
+                <button type="button" id="cancel-service" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                Cancelar
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+
+        <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal       = document.getElementById('service-modal');
+            const closeBtn    = document.getElementById('service-modal-close');
+            const cancelBtn   = document.getElementById('cancel-service');
+            const form        = document.getElementById('service-form');
+            const titleEl     = document.getElementById('service-modal-title');
+
+            function hideModal() {
+            modal.classList.add('hidden');
+            form.reset();
+            delete form.dataset.id;
+            titleEl.textContent = 'Agregar servicio';
+            }
+
+            // Close handlers
+            closeBtn.addEventListener('click', hideModal);
+            cancelBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', e => {
+            if (e.target === modal) hideModal();
+            });
+
+            // When "Agregar servicio" button (id="add-service-btn") is clicked,
+            // services.js already shows the modal—just clear form and title.
+            const addBtn = document.getElementById('add-service-btn');
+            if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                form.dataset.id = '';
+                form.reset();
+                titleEl.textContent = 'Agregar servicio';
+            });
+            }
+
+            // Observe dataset.id on the form to switch title to "Editar servicio"
+            new MutationObserver(mutations => {
+            mutations.forEach(m => {
+                if (m.attributeName === 'data-id' && form.dataset.id) {
+                titleEl.textContent = 'Editar servicio';
+                }
+            });
+            }).observe(form, { attributes: true });
+        });
+        </script>
+
+
+  <script type="module">
+    import { initServices } from '/assets/js/modules/services.js';
+    import { getCurrentUser, logout } from '/assets/js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+      });
+      // User dropdown
+      document.getElementById('user-menu-button').addEventListener('click', () => {
+        document.querySelector('[role="menu"]').classList.toggle('hidden');
+      });
+      document.addEventListener('click', event => {
+        if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+          document.querySelector('[role="menu"]').classList.add('hidden');
+        }
+      });
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
+      // Load user data
+      const user = getCurrentUser();
+      if (!user) { window.location.href = '/login.html'; return; }
+      document.getElementById('user-name').textContent = `${user.FirstName} ${user.LastName}`;
+      document.getElementById('sidebar-user-name').textContent = `${user.FirstName} ${user.LastName}`;
+      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${user.FirstName[0]}+${user.LastName[0]}`;
+      document.getElementById('user-avatar-img').src = avatarUrl;
+      document.getElementById('sidebar-user-avatar').src = avatarUrl;
+
+      // Inicializa servicios
+      initServices();
+    });
+  </script>
+</body>
+</html>
