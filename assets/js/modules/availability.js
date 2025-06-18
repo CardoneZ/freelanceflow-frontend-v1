@@ -38,8 +38,8 @@ function renderRecurringAvailability(availability) {
     
     container.innerHTML = availability.map(slot => `
         <tr data-id="${slot.id}">
-            <td class="px-6 py-4">${getDayName(slot.dayOfWeek)}</td>
-            <td class="px-6 py-4">${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}</td>
+            <td class="px-6 py-4">${getDayName(slot.DayOfWeek)}</td>
+            <td class="px-6 py-4">${formatTime(slot.StartTime)} - ${formatTime(slot.EndTime)}</td>
             <td class="px-6 py-4">
                 <button class="text-red-600 hover:text-red-900 delete-slot" data-id="${slot.id}">
                     <i class="fas fa-trash"></i>
@@ -49,9 +49,12 @@ function renderRecurringAvailability(availability) {
     `).join('');
 }
 
-function getDayName(dayIndex) {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[dayIndex];
+function getDayName(dayString) {
+    const daysMap = {
+        'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+        'thursday': 4, 'friday': 5, 'saturday': 6
+    };
+    return daysMap[dayString.toLowerCase()] || dayString;
 }
 
 function setupCalendar() {

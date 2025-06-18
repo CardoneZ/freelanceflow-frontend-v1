@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,60 +6,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FreelanceFlow | Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
     .smooth-transition { transition: all 0.3s ease; }
-    .sidebar { transition: transform 0.3s ease; }
+    .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
         position: fixed;
         z-index: 50;
         height: 100vh;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
       .sidebar.open { transform: translateX(0); }
     }
+    
     .profile-picture-container:hover .profile-picture-overlay {
       opacity: 1;
     }
     .profile-picture-overlay {
       transition: opacity 0.3s ease;
     }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Modal animation */
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-animate {
+      animation: modalFadeIn 0.2s ease-out forwards;
+    }
   </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50">
 
   <!-- Navbar -->
   <nav class="bg-white shadow-sm fixed w-full z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700">
+          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
             <i class="fas fa-bars text-xl"></i>
           </button>
           <div class="flex-shrink-0 flex items-center">
-            <img class="h-8 w-auto" src="/assets/images/logo.png" alt="FreelanceFlow">
-          </div>
-        </div>
-        <div class="flex items-center">
-          <div class="ml-4 flex items-center md:ml-6">
-            <button type="button" class="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <span class="sr-only">View notifications</span>
-              <div class="relative">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">3</span>
-              </div>
-            </button>
-            <div class="ml-3 relative">
-              <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <span class="sr-only">Open user menu</span>
-                <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
-                <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
-              </button>
-              <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu">
-                <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+            <div class="flex items-center">
+              <div class="flex items-center">
+                <div class="ml-4 flex items-center md:ml-6">
+
+                  <div class="ml-3 relative">
+                    <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      <span class="sr-only">Open user menu</span>
+                      <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
+                      <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
+                      <i class="fas fa-chevron-down ml-1 text-gray-400 text-xs hidden md:inline-block"></i>
+                    </button>
+                    <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                      <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user mr-2 text-gray-400"></i>Your Profile</a>
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog mr-2 text-gray-400"></i>Settings</a>
+                      <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-sign-out-alt mr-2 text-gray-400"></i>Sign out</a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -69,48 +123,50 @@
   </nav>
 
   <!-- Sidebar -->
-  <div class="sidebar bg-white w-64 fixed h-full shadow-md overflow-y-auto">
-    <div class="flex items-center justify-center h-16 border-b">
-      <span class="text-xl font-semibold text-gray-700">FreelanceFlow</span>
+  <div class="sidebar bg-white w-64 fixed h-full overflow-y-auto z-20">
+    <div class="flex items-center justify-center h-16 border-b px-4">
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-md bg-primary-600 flex items-center justify-center">
+          <i class="fas fa-calendar-alt text-white text-sm"></i>
+        </div>
+        <span class="ml-2 text-lg font-semibold text-gray-800">FreelanceFlow</span>
+      </div>
     </div>
     <div class="mt-6 px-4">
-      <div class="flex items-center px-4 py-3 bg-indigo-50 rounded-lg">
-        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="">
+      <div class="flex items-center px-4 py-3 bg-primary-50 rounded-lg">
+        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
         <div class="ml-3">
           <p class="text-sm font-medium text-gray-700" id="sidebar-user-name">Loading...</p>
-          <p class="text-xs text-gray-500">Professional</p>
+          <p class="text-xs text-gray-500">Professional Plan</p>
         </div>
       </div>
     </div>
-    <nav class="mt-6">
-      <a href="dashboard.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="fas fa-tachometer-alt mr-3 text-gray-500"></i>Dashboard
+    <nav class="mt-6 px-2">
+      <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="fas fa-tachometer-alt mr-3 text-gray-500 w-5 text-center"></i>Dashboard
       </a>
-      <a href="appointments.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="far fa-calendar-alt mr-3 text-gray-500"></i>Appointments
+      <a href="appointments.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-calendar-alt mr-3 text-gray-500 w-5 text-center"></i>Appointments
       </a>
-      <a href="clients.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="fas fa-users mr-3 text-gray-500"></i>Clients
+      <a href="services.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="fas fa-tasks mr-3 text-gray-500 w-5 text-center"></i>Services
       </a>
-      <a href="services.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="fas fa-tasks mr-3 text-gray-500"></i>Services
+      <a href="availability.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-clock mr-3 text-gray-500 w-5 text-center"></i>Availability
       </a>
-      <a href="availability.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="far fa-clock mr-3 text-gray-500"></i>Availability
+      <a href="reviews.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-star mr-3 text-gray-500 w-5 text-center"></i>Reviews
       </a>
-      <a href="reviews.html" class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-        <i class="far fa-star mr-3 text-gray-500"></i>Reviews
-      </a>
-      <div class="px-6 py-4 border-t mt-4">
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Settings</p>
-        <a href="profile.html" class="flex items-center px-2 py-2 mt-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-md">
-          <i class="fas fa-user mr-3 text-indigo-500"></i>Profile
+      <div class="px-2 py-4 border-t mt-4">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider px-2 mb-2">Settings</p>
+        <a href="profile.html" class="flex items-center px-4 py-2 text-sm font-medium text-primary-700 bg-primary-50 rounded-lg">
+          <i class="fas fa-user mr-3 text-primary-600 w-5 text-center"></i>Profile
         </a>
-        <a href="#" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-          <i class="fas fa-cog mr-3 text-gray-500"></i>Settings
+        <a href="#" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-cog mr-3 text-gray-500 w-5 text-center"></i>Settings
         </a>
-        <a href="#" id="sidebar-logout-btn" class="flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-          <i class="fas fa-sign-out-alt mr-3 text-gray-500"></i>Sign Out
+        <a href="#" id="sidebar-logout-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-sign-out-alt mr-3 text-gray-500 w-5 text-center"></i>Sign Out
         </a>
       </div>
     </nav>
@@ -122,18 +178,18 @@
       <!-- Profile Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Profile Settings</h1>
-          <p class="mt-1 text-sm text-gray-500">Update your personal and professional information</p>
+          <h1 class="text-2xl font-bold text-gray-900">Profile Settings</h1>
+          <p class="mt-2 text-sm text-gray-500">Update your personal and professional information</p>
         </div>
-        <button id="save-profile" class="mt-4 md:mt-0 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+        <button id="save-profile" class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
           <i class="fas fa-save mr-2"></i> Save Changes
         </button>
       </div>
 
       <!-- Profile Form -->
-      <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
         </div>
         
         <form id="profile-form" class="divide-y divide-gray-200">
@@ -142,7 +198,7 @@
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
               <div class="relative profile-picture-container">
                 <img id="profile-picture" class="h-24 w-24 rounded-full object-cover" 
-                     src="https://ui-avatars.com/api/?background=667eea&color=fff&name=JD" alt="Profile picture">
+                     src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="Profile picture">
                 <div class="profile-picture-overlay absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 cursor-pointer">
                   <span class="text-white text-sm font-medium">Change</span>
                 </div>
@@ -150,11 +206,11 @@
               <div class="flex flex-col space-y-2">
                 <label for="upload-picture" class="text-sm font-medium text-gray-700">Profile Photo</label>
                 <div class="flex space-x-2">
-                  <label for="upload-picture" class="cursor-pointer bg-white border border-gray-300 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <label for="upload-picture" class="cursor-pointer inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <i class="fas fa-upload mr-2"></i> Upload
                     <input id="upload-picture" type="file" accept="image/*" class="sr-only">
                   </label>
-                  <button type="button" class="bg-white border border-gray-300 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <i class="fas fa-trash-alt mr-2"></i> Remove
                   </button>
                 </div>
@@ -168,32 +224,32 @@
             <div class="sm:col-span-3">
               <label for="firstName" class="block text-sm font-medium text-gray-700">First name</label>
               <input type="text" name="firstName" id="firstName" autocomplete="given-name" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
 
             <div class="sm:col-span-3">
               <label for="lastName" class="block text-sm font-medium text-gray-700">Last name</label>
               <input type="text" name="lastName" id="lastName" autocomplete="family-name" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
 
             <div class="sm:col-span-4">
               <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
               <input type="email" name="email" id="email" autocomplete="email" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
 
             <div class="sm:col-span-3">
               <label for="profession" class="block text-sm font-medium text-gray-700">Profession</label>
               <input type="text" name="profession" id="profession" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
 
             <div class="sm:col-span-6">
               <label for="bio" class="block text-sm font-medium text-gray-700">About</label>
               <div class="mt-1">
                 <textarea id="bio" name="bio" rows="3" 
-                          class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border border-gray-300 rounded-md"></textarea>
+                          class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full border border-gray-300 rounded-lg"></textarea>
               </div>
               <p class="mt-2 text-sm text-gray-500">Write a few sentences about yourself.</p>
             </div>
@@ -201,7 +257,7 @@
 
           <!-- Professional Information Section -->
           <div class="px-6 py-5 border-t border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Professional Information</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Professional Information</h3>
           </div>
           <div class="px-6 py-5 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
             <div class="sm:col-span-3">
@@ -211,7 +267,7 @@
                   <span class="text-gray-500 sm:text-sm">$</span>
                 </div>
                 <input type="number" name="hourlyRate" id="hourlyRate" 
-                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="0.00">
+                       class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-lg" placeholder="0.00">
                 <div class="absolute inset-y-0 right-0 flex items-center">
                   <span class="h-full py-0 pl-2 pr-3 flex items-center pointer-events-none bg-gray-50 rounded-r-md text-gray-500 sm:text-sm">/hr</span>
                 </div>
@@ -221,62 +277,15 @@
             <div class="sm:col-span-3">
               <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
               <input type="text" name="location" id="location" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-
-            <div class="sm:col-span-6">
-              <label for="skills" class="block text-sm font-medium text-gray-700">Skills</label>
-              <input type="text" name="skills" id="skills" 
-                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <p class="mt-2 text-sm text-gray-500">Separate skills with commas (e.g., Web Design, Graphic Design)</p>
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
           </div>
 
-          <!-- Social Media Section -->
-          <div class="px-6 py-5 border-t border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Social Media</h3>
-          </div>
-          <div class="px-6 py-5 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            <div class="sm:col-span-6">
-              <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
-              <div class="mt-1 flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  https://
-                </span>
-                <input type="text" name="website" id="website" 
-                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300">
-              </div>
-            </div>
-
-            <div class="sm:col-span-3">
-              <label for="linkedin" class="block text-sm font-medium text-gray-700">LinkedIn</label>
-              <div class="mt-1 flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  linkedin.com/in/
-                </span>
-                <input type="text" name="linkedin" id="linkedin" 
-                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300">
-              </div>
-            </div>
-
-            <div class="sm:col-span-3">
-              <label for="twitter" class="block text-sm font-medium text-gray-700">Twitter</label>
-              <div class="mt-1 flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  twitter.com/
-                </span>
-                <input type="text" name="twitter" id="twitter" 
-                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300">
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
 
       <!-- Danger Zone -->
-      <div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
+      <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Danger Zone</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Danger Zone</h3>
         </div>
         <div class="px-6 py-5">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -303,7 +312,7 @@
             <p id="toast-message" class="text-sm font-medium"></p>
           </div>
           <div class="ml-4 flex-shrink-0 flex">
-            <button class="bg-gray-800 rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <button class="bg-gray-800 rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               <span class="sr-only">Close</span>
               <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -346,7 +355,7 @@
       document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
       document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
       
-      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
+      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
       document.getElementById('user-avatar-img').src = avatarUrl;
       document.getElementById('sidebar-user-avatar').src = avatarUrl;
       

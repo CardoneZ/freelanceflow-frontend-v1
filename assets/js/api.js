@@ -191,48 +191,70 @@ export const servicesAPI = {
 
 // Appointments API
 export const appointmentsAPI = {
-  async create(appointmentData) {
-    const response = await fetch(`${API_BASE_URL}/appointments`, 
-      fetchConfig('POST', appointmentData));
+  async getProfessionalAppointments(professionalId, params = {}) {
+    const { page, limit, ...otherParams } = params;
+    const queryParams = new URLSearchParams({
+      ...otherParams,
+      ...(page && { page }),
+      ...(limit && { limit })
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/appointments?professionalId=${professionalId}&${queryParams}`, {
+      headers: getAuthHeader()
+    });
     return handleResponse(response);
   },
 
-  async getAll(queryParams = {}) {
-    const params = new URLSearchParams(queryParams);
-    const response = await fetch(`${API_BASE_URL}/appointments?${params}`, 
-      fetchConfig('GET'));
+  async getUpcomingAppointments() {
+    const response = await fetch(`${API_BASE_URL}/appointments/upcoming/me`, {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async getAll(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_BASE_URL}/appointments?${queryParams}`, {
+      headers: getAuthHeader()
+    });
     return handleResponse(response);
   },
 
   async getById(id) {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, 
-      fetchConfig('GET'));
+    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+      headers: getAuthHeader()
+    });
     return handleResponse(response);
   },
 
-  async getUpcoming() {
-    const response = await fetch(`${API_BASE_URL}/appointments/upcoming`, 
-      fetchConfig('GET'));
+  async updateAppointmentStatus(id, status) {
+    const response = await fetch(`${API_BASE_URL}/appointments/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ Status: status })
+    });
     return handleResponse(response);
   },
 
-  async cancel(appointmentId) {
-    const response = await fetch(`${API_BASE_URL}/appointments/${appointmentId}/cancel`, 
-      fetchConfig('PUT'));
+  async cancelAppointment(id) {
+    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeader()
+    });
     return handleResponse(response);
   },
 
-  async updateStatus(appointmentId, status) {
-    const response = await fetch(`${API_BASE_URL}/appointments/${appointmentId}/status`, 
-      fetchConfig('PUT', { status }));
-    return handleResponse(response);
-  },
-
-  async complete(appointmentId) {
-    const response = await fetch(`${API_BASE_URL}/appointments/${appointmentId}/complete`, 
-      fetchConfig('PUT'));
+  async completeAppointment(id) {
+    const response = await fetch(`${API_BASE_URL}/appointments/${id}/complete`, {
+      method: 'PATCH',
+      headers: getAuthHeader()
+    });
     return handleResponse(response);
   }
+  
 };
 
 // Availability API
@@ -312,6 +334,12 @@ export const clientsAPI = {
     return handleResponse(response);
   }
 };
+
+function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 
 // Exportación global para facilitar el acceso
 export default {

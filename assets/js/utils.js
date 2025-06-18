@@ -47,3 +47,63 @@ export function showToast(message, type = 'info') {
     toast.remove();
   }, 3000);
 }
+
+export async function handleApiCall(apiCall, successMessage = '') {
+    try {
+        const response = await apiCall();
+        if (successMessage) {
+            showToast(successMessage, 'success');
+        }
+        return response;
+    } catch (error) {
+        console.error('API Error:', error);
+        const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+        showToast(`Error: ${errorMsg}`, 'error');
+        throw error;
+    }
+}
+
+export function normalizeUser(user) {
+  if (!user) return null;
+  
+  return {
+   
+    UserId: user.UserId,
+    Email: user.Email,
+    FirstName: user.FirstName,
+    LastName: user.LastName,
+    Role: user.Role,
+    ProfilePicture: user.ProfilePicture,
+    
+    
+    id: user.UserId,
+    email: user.Email,
+    firstName: user.FirstName,
+    lastName: user.LastName,
+    role: user.Role,
+    profilePicture: user.ProfilePicture
+  };
+}
+
+export function normalizeAppointment(appt) {
+    if (!appt) return null;
+    
+    return {
+        id: appt.AppointmentId || appt.id,
+        startTime: appt.StartTime,
+        endTime: appt.EndTime,
+        status: appt.Status,
+        service: {
+            id: appt.Service?.ServiceId || appt.service?.id,
+            name: appt.Service?.Name || appt.service?.name,
+            price: appt.Service?.Price || appt.service?.price
+        },
+        client: {
+            id: appt.Client?.ClientId || appt.client?.id,
+            firstName: appt.Client?.User?.FirstName || appt.client?.firstName,
+            lastName: appt.Client?.User?.LastName || appt.client?.lastName,
+            email: appt.Client?.User?.Email || appt.client?.email,
+            profilePicture: appt.Client?.User?.ProfilePicture || appt.client?.profilePicture
+        }
+    };
+}

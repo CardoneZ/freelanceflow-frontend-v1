@@ -11,7 +11,8 @@ export async function login(Email, Password) {
       Email: response.Email,
       FirstName: response.FirstName,
       LastName: response.LastName,
-      Role: response.Role
+      Role: response.Role,
+      ProfilePicture: response.ProfilePicture
     }));
     
     return response;

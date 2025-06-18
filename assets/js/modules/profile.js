@@ -1,6 +1,7 @@
 // assets/js/modules/profile.js
 import { usersAPI } from '../api.js';
 import { showToast } from '../utils.js';
+import { normalizeUser } from '../utils.js';
 
 export async function initProfile() {
     await loadProfile();
@@ -8,12 +9,13 @@ export async function initProfile() {
 }
 
 async function loadProfile() {
-    try {
-        const user = await usersAPI.getCurrentUser();
-        renderProfile(user);
-    } catch (error) {
-        showToast('Error loading profile', 'error');
-    }
+  try {
+    const user = normalizeUser(await usersAPI.getCurrentUser());
+    renderProfile(user);
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    showToast('Error loading profile', 'error');
+  }
 }
 
 function renderProfile(user) {

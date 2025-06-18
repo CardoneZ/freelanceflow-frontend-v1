@@ -11,41 +11,73 @@ export async function initAppointments() {
 
 function getCurrentProfessionalId() {
     const user = getCurrentUser();
-    return user.UserId;
+    return user?.UserId;
 }
 
 async function loadAppointments(page = 1, limit = 10) {
     try {
-        const response = await appointmentsAPI.getAll({
-            professionalId: getCurrentProfessionalId(),
-            page,
-            limit
-        });
-        
-        renderAppointmentsList(response.appointments);
-        updatePagination(response.total, page, limit);
+        console.log('Loading appointments with page:', page, 'limit:', limit);
+        const user = getCurrentUser();
+        console.log('Current User:', user);
+        const queryParams = { page, limit };
+        if (user?.Role === 'professional') {
+            queryParams.professionalId = user.UserId;
+        } else if (user?.Role === 'client') {
+            queryParams.clientId = user.UserId;
+        }
+        console.log('Query Params:', queryParams);
+        const response = await appointmentsAPI.getAll(queryParams);
+        console.log('API Response:', response);
+        const normalizedAppointments = response.data.map(appt => ({
+            id: appt.AppointmentId,
+            startTime: appt.StartTime,
+            endTime: appt.EndTime,
+            status: appt.Status,
+            service: {
+                id: appt.Service?.ServiceId,
+                name: appt.Service?.Name,
+                price: appt.Service?.Price,
+                professional: {
+                    id: appt.Professional?.ProfessionalId,
+                    firstName: appt.Professional?.User?.FirstName,
+                    lastName: appt.Professional?.User?.LastName
+                }
+            },
+            client: {
+                id: appt.Client?.ClientId,
+                firstName: appt.Client?.User?.FirstName,
+                lastName: appt.Client?.User?.LastName,
+                email: appt.Client?.User?.Email,
+                profilePicture: appt.Client?.User?.ProfilePicture
+            }
+        }));
+        console.log('Normalized Appointments:', normalizedAppointments);
+        renderAppointmentsList(normalizedAppointments);
+        updatePagination(response.pagination.totalItems, page, limit);
     } catch (error) {
+        console.error('Error loading appointments:', error);
         showToast('Error loading appointments', 'error');
     }
 }
 
 function renderAppointmentsList(appointments) {
     const container = document.getElementById('appointments-list');
-    
     if (!appointments || !appointments.length) {
         container.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No appointments found</td></tr>';
         return;
     }
-    
     container.innerHTML = appointments.map(appt => `
         <tr class="hover:bg-gray-50 cursor-pointer" data-id="${appt.id}">
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                        <img class="h-10 w-10 rounded-full" src="${appt.client.profilePicture || 'https://ui-avatars.com/api/?name=' + appt.client.name}" alt="">
+                        <img class="h-10 w-10 rounded-full" 
+                             src="${appt.client.profilePicture ? `http://localhost:4000${appt.client.profilePicture}` : 'https://ui-avatars.com/api/?name=' + (appt.client.firstName + ' ' + appt.client.lastName)}" alt="">
                     </div>
                     <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${appt.client.name}</div>
+                        <div class="text-sm font-medium text-gray-900">
+                            ${appt.client.firstName} ${appt.client.lastName}
+                        </div>
                         <div class="text-sm text-gray-500">${appt.client.email || ''}</div>
                     </div>
                 </div>
@@ -67,9 +99,18 @@ function renderAppointmentsList(appointments) {
                 <button class="text-indigo-600 hover:text-indigo-900 mr-2 view-appointment" data-id="${appt.id}">
                     View
                 </button>
-                ${appt.status === 'pending' ? 
+                ${appt.status === 'pending' && getCurrentUser().Role === 'professional' ? 
                     `<button class="text-green-600 hover:text-green-900 confirm-appointment" data-id="${appt.id}">
                         Confirm
+                    </button>` : ''}
+                ${(appt.status === 'pending' || appt.status === 'confirmed') && 
+                  getCurrentUser().Role === 'client' ? 
+                    `<button class="text-red-600 hover:text-red-900 cancel-appointment" data-id="${appt.id}">
+                        Cancel
+                    </button>` : ''}
+                ${appt.status === 'confirmed' && getCurrentUser().Role === 'professional' ? 
+                    `<button class="text-purple-600 hover:text-purple-900 complete-appointment" data-id="${appt.id}">
+                        Complete
                     </button>` : ''}
             </td>
         </tr>
@@ -80,7 +121,7 @@ function getStatusBadgeClass(appt) {
     switch(appt.status.toLowerCase()) {
         case 'confirmed': return 'bg-green-100 text-green-800';
         case 'completed': return 'bg-purple-100 text-purple-800';
-        case 'cancelled': return 'bg-red-100 text-red-800';
+        case 'canceled': return 'bg-red-100 text-red-800';
         case 'pending': return 'bg-yellow-100 text-yellow-800';
         default: return 'bg-gray-100 text-gray-800';
     }
@@ -88,12 +129,14 @@ function getStatusBadgeClass(appt) {
 
 async function loadCalendarAppointments() {
     try {
+        console.log('Initializing calendar');
         const calendarEl = document.getElementById('calendar');
-        
-        if (!calendarEl) return;
-        
+        if (!calendarEl) {
+            console.error('Calendar element not found');
+            return;
+        }
+
         const calendar = new FullCalendar.Calendar(calendarEl, {
-            plugins: [FullCalendar.dayGridPlugin, FullCalendar.timeGridPlugin, FullCalendar.interactionPlugin],
             initialView: 'dayGridMonth',
             headerToolbar: {
                 left: 'prev,next today',
@@ -102,25 +145,34 @@ async function loadCalendarAppointments() {
             },
             events: async (fetchInfo, successCallback, failureCallback) => {
                 try {
-                    const appointments = await appointmentsAPI.getAll({
-                        professionalId: getCurrentProfessionalId(),
-                        start: fetchInfo.startStr,
-                        end: fetchInfo.endStr
+                    console.log('Fetching calendar events with params:', fetchInfo);
+                    const user = getCurrentUser();
+                    const params = { start: fetchInfo.startStr, end: fetchInfo.endStr };
+                    if (user?.Role === 'professional') params.professionalId = user.UserId;
+                    else if (user?.Role === 'client') params.clientId = user.UserId;
+                    const response = await appointmentsAPI.getAll(params);
+                    console.log('Calendar API Response:', response);
+
+                    const events = response.data.map(appt => {
+                        const serviceName = appt.Service?.Name || 'Unknown Service';
+                        const clientFirstName = appt.Client?.User?.FirstName || 'Unknown';
+                        const proFirstName = appt.Professional?.User?.FirstName || 'Unknown';
+
+                        return {
+                            id: appt.AppointmentId,
+                            title: user.Role === 'professional'
+                                ? `${serviceName} with ${clientFirstName}`
+                                : `${serviceName} with ${proFirstName}`,
+                            start: appt.StartTime,
+                            end: appt.EndTime,
+                            color: getEventColor(appt.Status),
+                            extendedProps: { status: appt.Status || 'Unknown' }
+                        };
                     });
-                    
-                    const events = appointments.map(appt => ({
-                        id: appt.id,
-                        title: `${appt.service.name} with ${appt.client.name}`,
-                        start: appt.startTime,
-                        end: appt.endTime,
-                        color: getEventColor(appt.status),
-                        extendedProps: {
-                            status: appt.status
-                        }
-                    }));
-                    
+                    console.log('Calendar Events:', events);
                     successCallback(events);
                 } catch (error) {
+                    console.error('Error loading calendar events:', error);
                     failureCallback(error);
                 }
             },
@@ -128,8 +180,8 @@ async function loadCalendarAppointments() {
                 openAppointmentModal(info.event.id);
             }
         });
-        
         calendar.render();
+        console.log('Calendar rendered');
     } catch (error) {
         console.error('Error initializing calendar:', error);
     }
@@ -137,11 +189,11 @@ async function loadCalendarAppointments() {
 
 function getEventColor(status) {
     switch(status.toLowerCase()) {
-        case 'confirmed': return '#10B981'; // green
-        case 'completed': return '#8B5CF6'; // purple
-        case 'cancelled': return '#EF4444'; // red
-        case 'pending': return '#F59E0B'; // yellow
-        default: return '#6B7280'; // gray
+        case 'confirmed': return '#10B981';
+        case 'completed': return '#8B5CF6';
+        case 'canceled': return '#EF4444';
+        case 'pending': return '#F59E0B';
+        default: return '#6B7280';
     }
 }
 
@@ -169,12 +221,10 @@ function updatePagination(total, currentPage, limit) {
 }
 
 function setupEventListeners() {
-    // Refresh appointments
     document.getElementById('refresh-appointments')?.addEventListener('click', () => {
         loadAppointments();
     });
     
-    // Handle appointment actions
     document.addEventListener('click', async (e) => {
         if (e.target.closest('.view-appointment')) {
             const appointmentId = e.target.closest('.view-appointment').dataset.id;
@@ -188,7 +238,7 @@ function setupEventListeners() {
         
         if (e.target.closest('.cancel-appointment')) {
             const appointmentId = e.target.closest('.cancel-appointment').dataset.id;
-            await updateAppointmentStatus(appointmentId, 'cancelled');
+            await updateAppointmentStatus(appointmentId, 'canceled');
         }
         
         if (e.target.closest('.complete-appointment')) {
@@ -196,46 +246,73 @@ function setupEventListeners() {
             await updateAppointmentStatus(appointmentId, 'completed');
         }
     });
+
+    document.getElementById('modal-close-btn')?.addEventListener('click', () => {
+        document.getElementById('appointment-modal').classList.add('hidden');
+    });
+
+    document.getElementById('modal-confirm-btn')?.addEventListener('click', async () => {
+        const appointmentId = document.getElementById('modal-confirm-btn').dataset.id;
+        await updateAppointmentStatus(appointmentId, 'confirmed');
+    });
+
+    document.getElementById('modal-complete-btn')?.addEventListener('click', async () => {
+        const appointmentId = document.getElementById('modal-complete-btn').dataset.id;
+        await updateAppointmentStatus(appointmentId, 'completed');
+    });
+
+    document.getElementById('modal-cancel-btn')?.addEventListener('click', async () => {
+        const appointmentId = document.getElementById('modal-cancel-btn').dataset.id;
+        await updateAppointmentStatus(appointmentId, 'canceled');
+    });
 }
 
 async function openAppointmentModal(appointmentId) {
     try {
+        console.log('Opening modal for appointment:', appointmentId);
         const appointment = await appointmentsAPI.getById(appointmentId);
-        const modal = document.getElementById('appointment-modal');
+        const user = getCurrentUser();
+        const otherParty = user.Role === 'professional' ? appointment.Client.User : appointment.Professional.User;
+        document.getElementById('modal-client').textContent = `${otherParty.FirstName} ${otherParty.LastName}`;
+        document.getElementById('modal-service').textContent = appointment.Service.Name;
+        document.getElementById('modal-date').textContent = formatDate(appointment.StartTime);
+        document.getElementById('modal-time').textContent = `${formatTime(appointment.StartTime)} - ${formatTime(appointment.EndTime)}`;
+        document.getElementById('modal-status').textContent = appointment.Status;
         
-        document.getElementById('modal-client').textContent = appointment.client.name;
-        document.getElementById('modal-service').textContent = appointment.service.name;
-        document.getElementById('modal-date').textContent = formatDate(appointment.startTime);
-        document.getElementById('modal-time').textContent = `${formatTime(appointment.startTime)} - ${formatTime(appointment.endTime)}`;
-        document.getElementById('modal-status').textContent = appointment.status;
-        
-        // Set up action buttons based on status
         const confirmBtn = document.getElementById('modal-confirm-btn');
         const completeBtn = document.getElementById('modal-complete-btn');
         const cancelBtn = document.getElementById('modal-cancel-btn');
         
-        confirmBtn.style.display = appointment.status === 'pending' ? 'block' : 'none';
-        completeBtn.style.display = appointment.status === 'confirmed' ? 'block' : 'none';
-        cancelBtn.style.display = !['completed', 'cancelled'].includes(appointment.status) ? 'block' : 'none';
+        confirmBtn.style.display = appointment.Status === 'pending' && user.Role === 'professional' ? 'block' : 'none';
+        completeBtn.style.display = appointment.Status === 'confirmed' && user.Role === 'professional' ? 'block' : 'none';
+        cancelBtn.style.display = !['completed', 'canceled'].includes(appointment.Status) ? 'block' : 'none';
         
-        // Set appointment ID on buttons
         [confirmBtn, completeBtn, cancelBtn].forEach(btn => {
             btn.dataset.id = appointmentId;
         });
         
-        modal.classList.remove('hidden');
+        document.getElementById('appointment-modal').classList.remove('hidden');
     } catch (error) {
+        console.error('Error loading appointment details:', error);
         showToast('Error loading appointment details', 'error');
     }
 }
 
 async function updateAppointmentStatus(appointmentId, status) {
-    try {
-        await appointmentsAPI.updateStatus(appointmentId, status);
-        showToast(`Appointment ${status} successfully`, 'success');
-        await loadAppointments();
-        document.getElementById('appointment-modal').classList.add('hidden');
-    } catch (error) {
-        showToast(`Failed to ${status} appointment`, 'error');
+  try {
+    console.log(`Updating appointment ${appointmentId} to status: ${status}`);
+    const user = getCurrentUser();
+    if (!user || user.Role !== 'professional') {
+      throw new Error('Unauthorized: Only professionals can perform this action');
     }
+
+    await appointmentsAPI.updateAppointmentStatus(appointmentId, status);
+    showToast(`Appointment ${status} successfully`, 'success');
+    await loadAppointments();
+    await loadCalendarAppointments();
+    document.getElementById('appointment-modal').classList.add('hidden');
+  } catch (error) {
+    console.error(`Failed to ${status} appointment:`, error);
+    showToast(`Failed to ${status} appointment: ${error.message || 'Server error'}`, 'error');
+  }
 }

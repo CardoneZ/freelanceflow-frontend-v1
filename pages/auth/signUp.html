@@ -275,25 +275,21 @@
             signupForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                // Validate password match
                 if (passwordInput.value !== confirmPasswordInput.value) {
                     showError("Passwords don't match");
                     return;
                 }
 
-                // Validate password strength
                 if (passwordInput.value.length < 8) {
                     showError("Password must be at least 8 characters");
                     return;
                 }
 
-                // Validate terms checkbox
                 if (!document.getElementById('terms').checked) {
                     showError("You must agree to the terms and conditions");
                     return;
                 }
 
-                // Validate professional fields if professional is selected
                 const role = document.querySelector('input[name="role"]:checked').value;
                 if (role === 'professional') {
                     const title = document.getElementById('title').value;

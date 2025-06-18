@@ -1,19 +1,41 @@
 // assets/js/modules/services.js
 import { professionalsAPI } from '../api.js';
 import { showToast } from '../utils.js';
+import { normalizeUser } from '../utils.js';
 
 export async function initServices() {
-    await loadServices();
-    setupEventListeners();
+    try {
+        await loadServices();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error initializing services:', error);
+        showToast('Error initializing services', 'error');
+    }
 }
 
+function getCurrentProfessionalId() {
+  const user = normalizeUser(getCurrentUser());
+  if (!user) {
+    console.error('No user found');
+    return null;
+  }
+  return user.UserId; 
+}
+
+
 async function loadServices() {
-    try {
-         const services = await professionalsAPI.getServices(getCurrentProfessionalId());
-        renderServices(services);
-    } catch (error) {
-        showToast('Error loading services', 'error');
+  try {
+    const professionalId = getCurrentProfessionalId();
+    if (!professionalId) {
+      throw new Error('Professional ID not found');
     }
+    
+    const services = await professionalsAPI.getServices(professionalId);
+    renderServices(services);
+  } catch (error) {
+    console.error('Error loading services:', error);
+    showToast('Error loading services', 'error');
+  }
 }
 
 function renderServices(services) {
@@ -115,10 +137,5 @@ async function saveService() {
         console.error('Error saving service:', error);
         showToast('Error saving service: ' + (error.message || 'Unknown error'), 'error');
     }
-}
-
-function getCurrentProfessionalId() {
-  const user = getCurrentUser();
-  return user.UserId;   
 }
 

@@ -4,6 +4,7 @@ import { getCurrentUser, logout } from '../auth.js';
 import { formatDate, formatTime, renderStars, showToast } from '../utils.js';
 import { initAppointments } from './appointments.js';
 import { initServices } from './services.js';
+import { normalizeUser } from '../utils.js';
 
 export async function initDashboard() {
     try {
@@ -26,7 +27,7 @@ export async function initDashboard() {
 }
 
 async function loadUserData() {
-    const user = getCurrentUser();
+    const user = normalizeUser(getCurrentUser());
     if (!user) {
         window.location.href = '/auth/login.html';
         return;
@@ -37,8 +38,7 @@ async function loadUserData() {
     document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
     document.getElementById('welcome-message').textContent = `Welcome back, ${user.firstName}!`;
     
-    // Set avatar
-    const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
+    const avatarUrl = user.profilePicture || user.profilePicture || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
     document.getElementById('user-avatar-img').src = avatarUrl;
     document.getElementById('sidebar-user-avatar').src = avatarUrl;
 }
@@ -163,13 +163,16 @@ function renderReviews(reviews) {
         <li class="p-4 hover:bg-gray-50 smooth-transition">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <img class="h-10 w-10 rounded-full" src="${review.client.profilePicture || 'https://via.placeholder.com/40'}" alt="">
+                    <img class="h-10 w-10 rounded-full" 
+                         src="${review.Client?.User?.profilePicture || 'https://via.placeholder.com/40'}" alt="">
                 </div>
                 <div class="ml-4 flex-1">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-medium text-gray-900">${review.client.firstName} ${review.client.lastName}</h4>
+                        <h4 class="text-sm font-medium text-gray-900">
+                            ${review.Client?.User?.FirstName} ${review.Client?.User?.LastName}
+                        </h4>
                         <div class="flex">
-                            ${renderStars(review.rating)}
+                            ${renderStars(review.Rating)}
                         </div>
                     </div>
                     <div class="mt-1 text-sm text-gray-500">
@@ -220,6 +223,6 @@ function setupEventListeners() {
 }
 
 function getCurrentProfessionalId() {
-  const user = getCurrentUser();
-  return user.UserId;    // === el ID real que guardas en localStorage
+  const user = normalizeUser(getCurrentUser());
+  return user?.UserId;
 }
