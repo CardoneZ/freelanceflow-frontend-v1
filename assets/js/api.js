@@ -26,13 +26,15 @@ async function handleResponse(response) {
 // Configuración común mejorada para fetch
 function fetchConfig(method, data = null, headers = {}) {
   const token = localStorage.getItem('token');
+  console.log('Token:', token); // Agregar para depuración
   const config = {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` }),
       ...headers
-    }
+    },
+    credentials: 'include' // Asegura que las cookies se envíen si usas sesiones
   };
 
   if (data) {
@@ -152,7 +154,7 @@ export const professionalsAPI = {
 // Services API
 export const servicesAPI = {
   async getAll(queryParams = {}) {
-    const params = new URLSearchParams(queryParams);
+    const params = new URLSearchParams(queryParams).toString();
     const response = await fetch(`${API_BASE_URL}/services?${params}`, 
       fetchConfig('GET'));
     return handleResponse(response);

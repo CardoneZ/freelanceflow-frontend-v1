@@ -30,6 +30,7 @@ export function logout() {
 
 export function getCurrentUser() {
   const user = localStorage.getItem('user');
+  console.log('getCurrentUser - Raw user data:', user);
   return user ? JSON.parse(user) : null;
 }
 

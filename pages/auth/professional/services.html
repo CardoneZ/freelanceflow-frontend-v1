@@ -225,9 +225,10 @@
           <h1 class="text-2xl font-bold text-gray-900">Services</h1>
           <p class="mt-2 text-sm text-gray-500">Manage the services you offer to clients</p>
         </div>
-        <button id="add-service" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-          <i class="fas fa-plus mr-2"></i> Add Service
-        </button>
+        <div class="mb-4">
+        <button id="add-service" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Service</button>
+        <button id="refresh-services" class="ml-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Refresh</button>
+        </div>
       </div>
 
       <!-- Services Table -->
@@ -264,121 +265,120 @@
   </div>
 
   <!-- Add/Edit Service Modal -->
-  <div id="service-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50 p-4">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden modal-animate">
-      <!-- Header -->
-      <div class="px-6 py-4 border-b flex justify-between items-center">
-        <h2 id="service-modal-title" class="text-lg font-semibold text-gray-800">Add Service</h2>
-        <button id="service-modal-close" class="text-gray-400 hover:text-gray-500 focus:outline-none">
-          <i class="fas fa-times"></i>
-        </button>
+<div id="service-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
+    <button type="button" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onclick="document.getElementById('service-modal').classList.add('hidden')">&times;</button>
+    <h2 class="text-xl font-bold mb-4">Add Service</h2>
+    <form id="service-form">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Name</label>
+        <input type="text" name="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
       </div>
-      <!-- Form -->
-      <form id="service-form" class="px-6 py-4 space-y-4" data-id="">
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-          <input type="text" id="name" name="name" class="block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-primary-500 focus:border-primary-500" required>
-        </div>
-        <div>
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea id="description" name="description" rows="3" class="block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-primary-500 focus:border-primary-500"></textarea>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price ($/hr)</label>
-            <div class="relative">
-              <input type="number" id="price" name="price" min="0" step="0.01" class="block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-primary-500 focus:border-primary-500" required>
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <i class="fas fa-dollar-sign text-gray-400"></i>
-              </div>
-            </div>
-          </div>
-          <div>
-            <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Duration (min)</label>
-            <div class="relative">
-              <input type="number" id="duration" name="duration" min="0" class="block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-primary-500 focus:border-primary-500" required>
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <i class="far fa-clock text-gray-400"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="flex justify-end space-x-3 pt-4 border-t">
-          <button type="button" id="cancel-service" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-            Cancel
-          </button>
-          <button type="button" id="save-service" class="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-            Save Service
-          </button>
-        </div>
-      </form>
-    </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Description</label>
+        <input type="text" name="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Price ($/hr)</label>
+        <input type="number" name="price" step="0.01" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Duration (min)</label>
+        <input type="number" name="duration" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Max Duration (min)</label>
+        <input type="number" name="maxDuration" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Duration Increment (min)</label>
+        <input type="number" name="durationIncrement" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Price Type</label>
+        <select name="priceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+          <option value="hour">Per Hour</option>
+          <option value="flat">Flat Rate</option>
+        </select>
+      </div>
+      <div class="flex justify-end">
+        <button type="button" class="mr-2 px-4 py-2 text-gray-600 hover:text-gray-800" onclick="document.getElementById('service-modal').classList.add('hidden')">Cancel</button>
+        <button type="submit" id="save-service" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Service</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <script type="module">
-    import { initServices } from '/assets/js/modules/services.js';
-    import { getCurrentUser, logout } from '/assets/js/auth.js';
+  <!-- Module Scripts -->
+<script type="module" src="/assets/js/auth.js"></script>
+<script type="module" src="/assets/js/modules/services.js"></script>
+<script type="module">
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Current document URL:', document.URL);
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Mobile menu toggle
-      document.getElementById('mobile-menu-button').addEventListener('click', () => {
-        document.querySelector('.sidebar').classList.toggle('open');
-      });
-      
-      // User dropdown
-      document.getElementById('user-menu-button').addEventListener('click', () => {
-        document.querySelector('[role="menu"]').classList.toggle('hidden');
-      });
-      
-      document.addEventListener('click', event => {
-        if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
-          document.querySelector('[role="menu"]').classList.add('hidden');
-        }
-      });
-      
-      // Load user data
-      const user = getCurrentUser();
-      if (!user) { window.location.href = '/login.html'; return; }
-      
-      document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
-      document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
-      
-      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
-      document.getElementById('user-avatar-img').src = avatarUrl;
-      document.getElementById('sidebar-user-avatar').src = avatarUrl;
-      
-      // Service modal
-      const serviceModal = document.getElementById('service-modal');
-      const openModalBtn = document.getElementById('add-service');
-      const closeModalBtn = document.getElementById('service-modal-close');
-      const cancelBtn = document.getElementById('cancel-service');
-      
-      // Open modal
-      [openModalBtn, document.getElementById('add-first-service')].forEach(btn => {
-        if (btn) {
-          btn.addEventListener('click', () => {
-            serviceModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-          });
-        }
-      });
-      
-      // Close modal
-      [closeModalBtn, cancelBtn].forEach(btn => {
-        btn.addEventListener('click', () => {
-          serviceModal.classList.add('hidden');
-          document.body.style.overflow = 'auto';
-        });
-      });
-      
-      // Logout
-      document.getElementById('logout-btn').addEventListener('click', logout);
-      document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
-      
-      // Initialize services
-      initServices();
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('open');
     });
-  </script>
+
+    // User dropdown
+    document.getElementById('user-menu-button').addEventListener('click', () => {
+      document.querySelector('[role="menu"]').classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+        document.querySelector('[role="menu"]').classList.add('hidden');
+      }
+    });
+
+    // Logout
+    function logout() {
+      console.log('Logging out...');
+      window.location.href = '../login.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
+    // Update user info with logged-in user
+    try {
+      const { getCurrentUser } = await import('../../../assets/js/auth.js');
+      const user = getCurrentUser();
+      if (user) {
+        const userName = `${user.FirstName} ${user.LastName}`;
+        const userRole = user.Role || 'Professional';
+
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('sidebar-user-name').textContent = userName;
+
+        const userInfoElement = document.getElementById('user-info');
+        if (userInfoElement) {
+          userInfoElement.textContent = `ID: ${user.UserId} ${user.FirstName} ${user.LastName} | ${userRole} Plan`;
+        }
+
+        // Actualizar avatar
+        const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0] + user.LastName[0])}`;
+        document.getElementById('user-avatar-img').src = avatarUrl;
+        document.getElementById('sidebar-user-avatar').src = avatarUrl;
+      } else {
+        console.log('No user found in localStorage');
+        window.location.href = '../login.html';
+      }
+    } catch (error) {
+      console.error('Failed to load auth.js:', error);
+    }
+
+    // Initialize services module
+    try {
+      const { initServices } = await import('../../../assets/js/modules/services.js');
+      console.log('Services module loaded successfully');
+      await initServices();
+    } catch (error) {
+      console.error('Failed to load services.js:', error);
+    }
+  });
+</script>
+
 </body>
 </html>
