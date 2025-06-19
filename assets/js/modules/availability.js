@@ -1,4 +1,3 @@
-// assets/js/modules/availability.js
 import { availabilityAPI } from '../api.js';
 import { showToast, formatTime } from '../utils.js';
 import { getCurrentUser } from '../auth.js';
@@ -40,6 +39,7 @@ async function loadRecurringAvailability() {
 
     const today = new Date().toISOString().split('T')[0];
     const response = await availabilityAPI.getProfessionalAvailability(professionalId, today);
+    console.log('Recurring availability response:', response.recurring); // Add debug log
     
     renderRecurringAvailability(response.recurring || []);
     document.getElementById('showing-count').textContent = response.recurring?.length || 0;
@@ -149,44 +149,37 @@ function handleDateSelect(selectInfo) {
 
 function handleEventClick(clickInfo) {
   if (clickInfo.event.extendedProps.type === 'availability') {
-    if (confirm('Are you sure you want to delete this availability slot?')) {
-      deleteAvailabilitySlot(clickInfo.event.id);
-    }
+    showToast('Would you like to delete this availability slot?', 'info', 5000, {
+      buttons: [
+        {
+          text: 'Delete',
+          callback: () => deleteAvailabilitySlot(clickInfo.event.id)
+        },
+        {
+          text: 'Cancel',
+          callback: () => {}
+        }
+      ]
+    });
   }
 }
 
 async function deleteAvailabilitySlot(slotId) {
   try {
-    if (!confirm('Are you sure you want to delete this availability slot?')) return;
-
     const professionalId = getCurrentProfessionalId();
     if (!professionalId) throw new Error('Professional ID not found');
 
-    const slot = await availabilityAPI.getSlot(professionalId, slotId);
+    console.log('Deleting slot with ID:', slotId, 'for ProfessionalId:', professionalId); // Add debug log
+    await availabilityAPI.delete(professionalId, slotId);
+    showToast('Availability slot deleted', 'success');
     
-    if (slot.IsRecurring) {
-      const deleteChoice = confirm('This is a recurring slot. Do you want to:\n\n' +
-        'OK - Delete only this instance\n' +
-        'Cancel - Delete the entire recurring pattern');
-      
-      if (deleteChoice) {
-        await availabilityAPI.createException(professionalId, {
-          OriginalSlotId: slotId,
-          ExceptionDate: new Date().toISOString().split('T')[0]
-        });
-        showToast('Recurring slot exception created', 'success');
-      } else {
-        await availabilityAPI.delete(professionalId, slotId);
-        showToast('Recurring pattern deleted', 'success');
-      }
-    } else {
-      await availabilityAPI.delete(professionalId, slotId);
-      showToast('Availability slot deleted', 'success');
-    }
-
-    calendar.refetchEvents();
     await loadRecurringAvailability();
+    if (calendar) {
+      calendar.refetchEvents();
+      calendar.render();
+    }
   } catch (error) {
+    console.error('Error deleting slot:', error);
     showToast('Error deleting availability slot: ' + error.message, 'error');
   }
 }
@@ -217,9 +210,7 @@ async function saveAvailability() {
     saveBtn.disabled = true;
 
     const professionalId = getCurrentProfessionalId();
-    if (!professionalId) {
-      throw new Error('Professional not found');
-    }
+    if (!professionalId) throw new Error('Professional not found');
 
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayOfWeek = form.recurring.checked ? dayNames[parseInt(form.dayOfWeek.value)] : null;
@@ -233,20 +224,26 @@ async function saveAvailability() {
       ValidTo: form.recurring.checked ? '2025-12-31' : new Date().toISOString().split('T')[0]
     };
 
-    console.log('Sending availability data:', availabilityData);
+    console.log('Saving slot with ID:', form.dataset.editingId, 'Data:', availabilityData); // Add debug log
 
-    const response = await availabilityAPI.create(professionalId, [availabilityData]);
-    
-    if (!response) {
-      throw new Error('No response from server');
+    let response;
+    if (form.dataset.editingId) {
+      // Update existing slot
+      response = await availabilityAPI.update(professionalId, form.dataset.editingId, [availabilityData]);
+      delete form.dataset.editingId;
+    } else {
+      // Create new slot
+      response = await availabilityAPI.create(professionalId, [availabilityData]);
     }
+    
+    if (!response) throw new Error('No response from server');
 
     showToast('Availability saved successfully!', 'success');
     document.getElementById('availability-modal').classList.add('hidden');
     
-    await loadRecurringAvailability();
     if (calendar) {
       calendar.refetchEvents();
+      await loadRecurringAvailability();
       calendar.render();
     }
   } catch (error) {
@@ -266,38 +263,52 @@ async function fetchCalendarAvailability(fetchInfo, successCallback, failureCall
     const date = fetchInfo.startStr.split('T')[0];
     const response = await availabilityAPI.getProfessionalAvailability(professionalId, date);
 
-    const events = response.calendar.map(slot => {
-      let dayOfWeek = null;
-      if (slot.IsRecurring && slot.DayOfWeek !== null) {
-        if (typeof slot.DayOfWeek === 'string') {
-          dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-            .indexOf(slot.DayOfWeek.toLowerCase());
-        } else {
-          dayOfWeek = slot.DayOfWeek;
-        }
-      }
-
-      if (slot.IsRecurring && dayOfWeek !== null) {
-        return {
-          id: slot.AvailabilityId,
-          title: 'Available (Recurring)',
-          daysOfWeek: [dayOfWeek],
-          startTime: slot.StartTime,
-          endTime: slot.EndTime,
-          startRecur: slot.startRecur ? new Date(slot.startRecur).toISOString() : null,
-          endRecur: slot.endRecur ? new Date(slot.endRecur).toISOString() : null,
-          backgroundColor: 'rgba(16, 185, 129, 0.2)',
-          borderColor: 'rgba(16, 185, 129, 0.8)',
-          extendedProps: {
-            type: 'availability',
-            isRecurring: true
+    const events = response.calendar
+      .map(slot => {
+        if (slot.IsRecurring) {
+          if (!slot.daysOfWeek || !slot.startTime || !slot.endTime) {
+            console.warn('Skipping recurring slot - missing required fields:', slot);
+            return null;
           }
-        };
-      }
 
-      return null; // Skip non-recurring for now (handled separately if needed)
-    }).filter(event => event !== null);
+          return {
+            id: slot.id,
+            title: 'Available (Recurring)',
+            daysOfWeek: slot.daysOfWeek,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            startRecur: slot.startRecur || date,
+            endRecur: slot.endRecur || '2025-12-31',
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            borderColor: 'rgba(16, 185, 129, 0.8)',
+            extendedProps: {
+              type: 'availability',
+              isRecurring: true
+            }
+          };
+        } else {
+          if (!slot.start || !slot.end) {
+            console.warn('Skipping one-time slot - missing start/end times:', slot);
+            return null;
+          }
 
+          return {
+            id: slot.id,
+            title: 'Available (One-time)',
+            start: slot.start,
+            end: slot.end,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgba(59, 130, 246, 0.8)',
+            extendedProps: {
+              type: 'availability',
+              isRecurring: false
+            }
+          };
+        }
+      })
+      .filter(event => event !== null);
+
+    console.log('Valid calendar events:', events);
     successCallback(events);
   } catch (error) {
     console.error('Error loading calendar availability:', error);
@@ -328,6 +339,7 @@ function setupEventListeners() {
       const form = document.getElementById('availability-form');
       if (form) {
         form.reset();
+        delete form.dataset.editingId;
         document.getElementById('day-of-week-container').classList.add('hidden');
         document.getElementById('availability-modal').classList.remove('hidden');
       }
@@ -375,6 +387,7 @@ function setupEventListeners() {
       const form = document.getElementById('availability-form');
       if (form) {
         form.reset();
+        delete form.dataset.editingId;
         document.getElementById('recurring').checked = true;
         document.getElementById('day-of-week-container').classList.remove('hidden');
         document.getElementById('availability-modal').classList.remove('hidden');
@@ -389,11 +402,56 @@ function setupEventListeners() {
     if (deleteBtn) {
       e.preventDefault();
       const slotId = deleteBtn.dataset.id;
-      if (confirm('Are you sure you want to delete this availability slot?')) {
-        deleteAvailabilitySlot(slotId);
-      }
+      deleteAvailabilitySlot(slotId); // Direct delete without confirmation
     }
   });
+
+  document.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-slot');
+    if (editBtn) {
+      e.preventDefault();
+      const slotId = editBtn.dataset.id;
+      editAvailabilitySlot(slotId);
+    }
+  });
+}
+
+async function editAvailabilitySlot(slotId) {
+  try {
+    const professionalId = getCurrentProfessionalId();
+    if (!professionalId) throw new Error('Professional ID not found');
+
+    const slot = await availabilityAPI.getSlot(professionalId, slotId);
+    if (!slot) {
+      showToast('Availability slot not found', 'error');
+      return;
+    }
+
+    const form = document.getElementById('availability-form');
+    const modal = document.getElementById('availability-modal');
+
+    let dayOfWeekValue = 0;
+    if (slot.DayOfWeek) {
+      if (typeof slot.DayOfWeek === 'string') {
+        dayOfWeekValue = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+          .indexOf(slot.DayOfWeek.toLowerCase());
+      } else {
+        dayOfWeekValue = slot.DayOfWeek;
+      }
+    }
+
+    form.startTime.value = slot.StartTime.slice(0, 5);
+    form.endTime.value = slot.EndTime.slice(0, 5);
+    form.recurring.checked = slot.IsRecurring;
+    form.dayOfWeek.value = dayOfWeekValue;
+    
+    document.getElementById('day-of-week-container').classList.toggle('hidden', !slot.IsRecurring);
+    modal.classList.remove('hidden');
+    form.dataset.editingId = slotId;
+  } catch (error) {
+    console.error('Error loading slot details:', error);
+    showToast(`Error loading slot details: ${error.message || 'Slot not found'}`, 'error');
+  }
 }
 
 function setupCalendar() {
@@ -422,11 +480,28 @@ function setupCalendar() {
     eventDidMount: (info) => {
       if (info.event.extendedProps.type === 'availability') {
         info.el.style.cursor = 'pointer';
+        if (info.event.extendedProps.isRecurring) {
+          info.el.style.borderLeft = '4px solid rgba(16, 185, 129, 0.8)';
+        } else {
+          info.el.style.borderLeft = '4px solid rgba(59, 130, 246, 0.8)';
+        }
       }
     },
-    now: new Date().toISOString(), // Ensure current date is set
-    dayRender: (info) => {
-      console.log('Rendering day:', info.dateStr); // Debug which days are rendered
+    eventContent: (arg) => {
+      // Personalizar el contenido del evento
+      const title = document.createElement('div');
+      title.textContent = arg.event.title;
+      title.style.fontWeight = 'bold';
+      
+      const time = document.createElement('div');
+      time.textContent = `${moment(arg.event.start).format('HH:mm')} - ${moment(arg.event.end).format('HH:mm')}`;
+      time.style.fontSize = '0.85em';
+      
+      const container = document.createElement('div');
+      container.appendChild(title);
+      container.appendChild(time);
+      
+      return { domNodes: [container] };
     }
   });
 

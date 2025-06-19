@@ -1,9 +1,7 @@
-// assets/js/api.js
 export const API_BASE_URL = window.API_BASE_URL || 'http://localhost:4000/api';
 
 // Helper mejorado para manejar respuestas
 async function handleResponse(response) {
-  
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     
@@ -92,16 +90,16 @@ export const usersAPI = {
     return handleResponse(response);
   },
 
- updateUser: async (userId, userData) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, 
-      fetchConfig('PUT', userData));
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('API updateUser error:', error);
-    throw error;
-  }
-},
+  async updateUser(userId, userData) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, 
+        fetchConfig('PUT', userData));
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('API updateUser error:', error);
+      throw error;
+    }
+  },
 
   async uploadProfilePicture(formData) {
     const token = localStorage.getItem('token');
@@ -168,14 +166,14 @@ export const professionalsAPI = {
     return handleResponse(response);
   }, 
   
-  async createException (professionalId, exceptionData) {
-  const response = await fetch(`${API_BASE_URL}/${professionalId}/availability/exceptions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(exceptionData)
-  });
-  return await response.json();
-}
+  async createException(professionalId, exceptionData) {
+    const response = await fetch(`${API_BASE_URL}/${professionalId}/availability/exceptions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(exceptionData)
+    });
+    return await response.json();
+  }
 };
 
 // Services API
@@ -283,46 +281,75 @@ export const appointmentsAPI = {
     });
     return handleResponse(response);
   }
-  
 };
 
 // Availability API
 export const availabilityAPI = {
-    async getProfessionalAvailability(professionalId, date) {
+  async getProfessionalAvailability(professionalId, date) {
     const response = await fetch(`${API_BASE_URL}/availability/${professionalId}?date=${date}`, 
       fetchConfig('GET'));
     return handleResponse(response);
   },
-    async create(professionalId, availabilityData) {
+
+  async getSlot(professionalId, slotId) {
+    const response = await fetch(`${API_BASE_URL}/availability/${professionalId}/${slotId}`, 
+      fetchConfig('GET'));
+    return handleResponse(response);
+  },
+
+  async create(professionalId, availabilityData) {
     const url = `${API_BASE_URL}/availability/${professionalId}`;
     const response = await fetch(url, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${localStorage.getItem('token')}` 
-        },
-        body: JSON.stringify({ availability: availabilityData })
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+      },
+      body: JSON.stringify({ availability: availabilityData })
     });
     
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        error.status = response.status;
-        error.data = errorData;
-        throw error;
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.data = errorData;
+      throw error;
     }
     
     return response.json();
-},
-    async delete(professionalId, slotId) {
-        const url = `${API_BASE_URL}/availability/${professionalId}/${slotId}`;
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
+  },
+
+  async update(professionalId, slotId, availabilityData) {
+    const url = `${API_BASE_URL}/availability/${professionalId}/${slotId}`;
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+      },
+      body: JSON.stringify({ availability: availabilityData })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.data = errorData;
+      throw error;
     }
+    
+    return response.json();
+  },
+
+  async delete(professionalId, slotId) {
+    const url = `${API_BASE_URL}/availability/${professionalId}/${slotId}`;
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  }
 };
 
 // Reviews API
@@ -386,8 +413,6 @@ function getAuthHeader() {
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
-
-
 
 // Exportación global para facilitar el acceso
 export default {
