@@ -166,7 +166,16 @@ export const professionalsAPI = {
     const response = await fetch(`${API_BASE_URL}/professionals/${professionalId}`, 
       fetchConfig('PUT', professionalData));
     return handleResponse(response);
-  }
+  }, 
+  
+  async createException (professionalId, exceptionData) {
+  const response = await fetch(`${API_BASE_URL}/${professionalId}/availability/exceptions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(exceptionData)
+  });
+  return await response.json();
+}
 };
 
 // Services API
@@ -280,17 +289,10 @@ export const appointmentsAPI = {
 // Availability API
 export const availabilityAPI = {
     async getProfessionalAvailability(professionalId, date) {
-        const url = `${API_BASE_URL}/availability/${professionalId}?date=${date}&duration=60`;
-        console.log('Fetching availability from:', url); // Debug log
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
-        console.log('Availability API response:', data); // Debug log
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return data;
-    },
+    const response = await fetch(`${API_BASE_URL}/availability/${professionalId}?date=${date}`, 
+      fetchConfig('GET'));
+    return handleResponse(response);
+  },
     async create(professionalId, availabilityData) {
     const url = `${API_BASE_URL}/availability/${professionalId}`;
     const response = await fetch(url, {
@@ -384,6 +386,7 @@ function getAuthHeader() {
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
+
 
 
 // Exportación global para facilitar el acceso
