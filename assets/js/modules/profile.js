@@ -1,72 +1,158 @@
 // assets/js/modules/profile.js
 import { usersAPI } from '../api.js';
 import { showToast } from '../utils.js';
-import { normalizeUser } from '../utils.js';
+
+
 
 export async function initProfile() {
-    await loadProfile();
-    setupEventListeners();
+  await loadProfile();
+  setupEventListeners();
 }
+
+function normalizeUser(user) {
+  if (!user) return null;
+  
+  return {
+    UserId: user.UserId || user.id,
+    FirstName: user.FirstName || user.firstName,
+    LastName: user.LastName || user.lastName,
+    Email: user.Email || user.email,
+    Role: user.Role || user.role,
+    ProfilePicture: user.ProfilePicture || user.profilePicture,
+    Professional: user.Professional || user.professionalInfo
+  };
+}
+
 
 async function loadProfile() {
   try {
     const user = normalizeUser(await usersAPI.getCurrentUser());
+    if (!user) throw new Error('No user data received');
     renderProfile(user);
   } catch (error) {
-    console.error('Error loading profile:', error);
-    showToast('Error loading profile', 'error');
+    console.error('Profile load error:', error);
+    showToast('Failed to load profile data', 'error');
   }
 }
 
 function renderProfile(user) {
-    const form = document.getElementById('profile-form');
-    
-    form.firstName.value = user.firstName || '';
-    form.lastName.value = user.lastName || '';
-    form.email.value = user.email || '';
-    form.profession.value = user.profession || '';
-    form.bio.value = user.bio || '';
-    
-    if (user.profilePicture) {
-        document.getElementById('profile-picture').src = user.profilePicture;
-    }
+  const form = document.getElementById('profile-form');
+  if (!form) return;
+
+  // Personal info
+  form.firstName.value = user.FirstName || user.firstName || '';
+  form.lastName.value = user.LastName || user.lastName || '';
+  form.email.value = user.Email || user.email || '';
+
+  // Professional info
+  if (user.Role === 'professional' || user.role === 'professional') {
+    const profInfo = user.Professional || user.professionalInfo;
+    form.profession.value = profInfo?.title || '';
+    form.bio.value = profInfo?.bio || '';
+    form.hourlyRate.value = profInfo?.hourlyRate || '';
+    form.location.value = profInfo?.location || '';
+  }
 }
 
 function setupEventListeners() {
-    document.getElementById('save-profile').addEventListener('click', saveProfile);
-    document.getElementById('upload-picture').addEventListener('change', handlePictureUpload);
+  const saveBtn = document.getElementById('save-profile');
+  if (saveBtn) saveBtn.addEventListener('click', saveProfile);
 }
 
-async function handlePictureUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('profile-picture').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+function validateForm(form) {
+  // Check required fields
+  if (!form.firstName.value.trim()) {
+    showToast('First name is required', 'error');
+    form.firstName.focus();
+    return false;
+  }
+  
+  if (!form.lastName.value.trim()) {
+    showToast('Last name is required', 'error');
+    form.lastName.focus();
+    return false;
+  }
+  
+  if (!form.email.value.trim()) {
+    showToast('Email is required', 'error');
+    form.email.focus();
+    return false;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email.value)) {
+    showToast('Please enter a valid email address', 'error');
+    form.email.focus();
+    return false;
+  }
+  
+  // Validate hourly rate if provided
+  if (form.hourlyRate.value && isNaN(parseFloat(form.hourlyRate.value))) {
+    showToast('Hourly rate must be a number', 'error');
+    form.hourlyRate.focus();
+    return false;
+  }
+  
+  return true;
 }
 
 async function saveProfile() {
-    const form = document.getElementById('profile-form');
-    const formData = new FormData();
-    
-    formData.append('firstName', form.firstName.value);
-    formData.append('lastName', form.lastName.value);
-    formData.append('email', form.email.value);
-    formData.append('profession', form.profession.value);
-    formData.append('bio', form.bio.value);
-    
-    const pictureInput = document.getElementById('upload-picture');
-    if (pictureInput.files[0]) {
-        formData.append('profilePicture', pictureInput.files[0]);
-    }
+  const form = document.getElementById('profile-form');
+  if (!form) return;
 
-    try {
-        await usersAPI.updateProfile(formData);
-        showToast('Profile saved successfully', 'success');
-    } catch (error) {
-        showToast('Error saving profile', 'error');
+  try {
+    const userId = (await usersAPI.getCurrentUser()).id;
+    
+    const userData = {
+      firstName: form.firstName.value.trim(),
+      lastName: form.lastName.value.trim(),
+      email: form.email.value.trim(),
+      professionalInfo: {
+        title: form.profession.value.trim(),
+        bio: form.bio.value.trim(),
+        hourlyRate: form.hourlyRate.value ? parseFloat(form.hourlyRate.value) : null,
+        location: form.location.value.trim()
+      }
+    };
+
+    const response = await usersAPI.updateUser(userId, userData);
+    
+    if (response.success) {
+      showToast('Profile saved successfully', 'success');
+      
+      // Actualizar el localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      const updatedUser = {
+        ...currentUser,
+        FirstName: response.user.firstName,
+        LastName: response.user.lastName,
+        Email: response.user.email,
+        professionalInfo: response.user.professionalInfo
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Actualizar el DOM
+      updateUserUI(updatedUser);
+    } else {
+      throw new Error(response.message || 'Update failed');
     }
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast(`Save failed: ${error.message}`, 'error');
+  }
+}
+
+// Nueva función para actualizar la UI
+function updateUserUI(user) {
+  // Actualizar nombre en el navbar
+  document.getElementById('user-name').textContent = `${user.FirstName} ${user.LastName}`;
+  
+  // Actualizar nombre en el sidebar
+  document.getElementById('sidebar-user-name').textContent = `${user.FirstName} ${user.LastName}`;
+  
+  // Actualizar avatar si es necesario (puedes agregar lógica para la imagen aquí)
+  const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0]+user.LastName[0])}`;
+  document.getElementById('user-avatar-img').src = avatarUrl;
+  document.getElementById('sidebar-user-avatar').src = avatarUrl;
 }

@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FreelanceFlow | Profile</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -193,50 +194,24 @@
         </div>
         
         <form id="profile-form" class="divide-y divide-gray-200">
-          <!-- Profile Picture Section -->
-          <div class="px-6 py-5">
-            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-              <div class="relative profile-picture-container">
-                <img id="profile-picture" class="h-24 w-24 rounded-full object-cover" 
-                     src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="Profile picture">
-                <div class="profile-picture-overlay absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 cursor-pointer">
-                  <span class="text-white text-sm font-medium">Change</span>
-                </div>
-              </div>
-              <div class="flex flex-col space-y-2">
-                <label for="upload-picture" class="text-sm font-medium text-gray-700">Profile Photo</label>
-                <div class="flex space-x-2">
-                  <label for="upload-picture" class="cursor-pointer inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                    <i class="fas fa-upload mr-2"></i> Upload
-                    <input id="upload-picture" type="file" accept="image/*" class="sr-only">
-                  </label>
-                  <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                    <i class="fas fa-trash-alt mr-2"></i> Remove
-                  </button>
-                </div>
-                <p class="text-xs text-gray-500">JPG, GIF or PNG. Max size of 5MB</p>
-              </div>
-            </div>
-          </div>
-
           <!-- Basic Information Section -->
           <div class="px-6 py-5 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
             <div class="sm:col-span-3">
               <label for="firstName" class="block text-sm font-medium text-gray-700">First name</label>
               <input type="text" name="firstName" id="firstName" autocomplete="given-name" 
-                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
             </div>
 
             <div class="sm:col-span-3">
               <label for="lastName" class="block text-sm font-medium text-gray-700">Last name</label>
               <input type="text" name="lastName" id="lastName" autocomplete="family-name" 
-                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
             </div>
 
             <div class="sm:col-span-4">
               <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
               <input type="email" name="email" id="email" autocomplete="email" 
-                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
             </div>
 
             <div class="sm:col-span-3">
@@ -280,7 +255,8 @@
                      class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
           </div>
-
+        </form>
+      </div>
 
       <!-- Danger Zone -->
       <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -293,7 +269,7 @@
               <h4 class="text-sm font-medium text-gray-900">Delete Account</h4>
               <p class="mt-1 text-sm text-gray-500">Once you delete your account, there is no going back. Please be certain.</p>
             </div>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" disabled>
               Delete Account
             </button>
           </div>
@@ -349,25 +325,41 @@
       document.getElementById('logout-btn').addEventListener('click', logout);
       document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
 
-      const user = getCurrentUser();
-      if (!user) { window.location.href = '/login.html'; return; }
-      
-      document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
-      document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
-      
-      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
-      document.getElementById('user-avatar-img').src = avatarUrl;
-      document.getElementById('sidebar-user-avatar').src = avatarUrl;
-      
-      // Initialize profile module
-      initProfile();
-      
-      // Profile picture hover effect
-      const profilePictureContainer = document.querySelector('.profile-picture-container');
-      if (profilePictureContainer) {
-        profilePictureContainer.addEventListener('click', () => {
-          document.getElementById('upload-picture').click();
-        });
+      // Update user info with logged-in user
+      try {
+        const { getCurrentUser } = await import('../../../assets/js/auth.js');
+        const user = getCurrentUser();
+        if (user) {
+          const userName = `${user.FirstName} ${user.LastName}`;
+          const userRole = user.Role || 'Professional';
+
+          document.getElementById('user-name').textContent = userName;
+          document.getElementById('sidebar-user-name').textContent = userName;
+
+          const userInfoElement = document.getElementById('user-info');
+          if (userInfoElement) {
+            userInfoElement.textContent = `ID: ${user.UserId} ${user.FirstName} ${user.LastName} | ${userRole} Plan`;
+          }
+
+          // Update avatar
+          const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0] + user.LastName[0])}`;
+          document.getElementById('user-avatar-img').src = avatarUrl;
+          document.getElementById('sidebar-user-avatar').src = avatarUrl;
+        } else {
+          console.log('No user found in localStorage');
+          window.location.href = '../login.html';
+        }
+      } catch (error) {
+        console.error('Failed to load auth.js:', error);
+      }
+
+      // Initialize reviews module
+      try {
+        const { initProfile } = await import('../../../assets/js/modules/profile.js');
+        console.log('Profile module loaded successfully');
+        await initProfile();
+      } catch (error) {
+        console.error('Failed to load profile.js:', error);
       }
     });
   </script>

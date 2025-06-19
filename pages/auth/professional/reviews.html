@@ -5,6 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FreelanceFlow | Reviews</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script type="module" src="/assets/js/modules/reviews.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -204,7 +206,7 @@
           <h3 class="text-lg font-semibold text-gray-900">All Reviews</h3>
           <p class="mt-1 text-sm text-gray-500">Reviews from your clients</p>
         </div>
-        <div id="reviews-container" class="divide-y divide-gray-200">
+        <div id="reviews-list" data-page="1" class="divide-y divide-gray-200">
           <!-- Reviews will be loaded here -->
           <div class="px-6 py-4 text-center text-gray-500">
             <i class="far fa-star text-gray-400 text-xl mb-2"></i>
@@ -215,7 +217,7 @@
           <div class="flex justify-between items-center">
             <div class="text-sm text-gray-500" id="reviews-count">Showing 0 reviews</div>
             <div class="flex space-x-2">
-              <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">Previous</button>
+              <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
               <button id="next-page" class="px-3 py-1 border border-transparent rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50">Next</button>
             </div>
           </div>
@@ -225,8 +227,8 @@
   </div>
 
   <script type="module">
+    import { initReviews } from '/assets/js/modules/reviews.js';
     import { getCurrentUser, logout } from '/assets/js/auth.js';
-    import { reviewsAPI } from '/assets/js/api.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       // Mobile menu toggle
@@ -249,121 +251,42 @@
       document.getElementById('logout-btn').addEventListener('click', logout);
       document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
 
-      // Load user data
-      const user = getCurrentUser();
-      if (!user) { window.location.href = '/login.html'; return; }
-      
-      document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
-      document.getElementById('sidebar-user-name').textContent = `${user.firstName} ${user.lastName}`;
-      
-      const avatarUrl = user.profilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${user.firstName[0]}+${user.lastName[0]}`;
-      document.getElementById('user-avatar-img').src = avatarUrl;
-      document.getElementById('sidebar-user-avatar').src = avatarUrl;
+      // Update user info with logged-in user
+      try {
+        const { getCurrentUser } = await import('../../../assets/js/auth.js');
+        const user = getCurrentUser();
+        if (user) {
+          const userName = `${user.FirstName} ${user.LastName}`;
+          const userRole = user.Role || 'Professional';
 
-      // Load reviews
-      const loadReviews = async (page = 1, limit = 10) => {
-        try {
-          const reviewsContainer = document.getElementById('reviews-container');
-          reviewsContainer.innerHTML = `
-            <div class="px-6 py-4 text-center text-gray-500">
-              <i class="fas fa-circle-notch fa-spin text-gray-400 text-xl mb-2"></i>
-              <p>Loading reviews...</p>
-            </div>
-          `;
+          document.getElementById('user-name').textContent = userName;
+          document.getElementById('sidebar-user-name').textContent = userName;
 
-          // Get professional ID from user data
-          const professionalId = user.professionalId || user.id;
-          
-          // Fetch reviews
-          const response = await reviewsAPI.getProfessionalReviews(professionalId, { page, limit });
-          const reviews = response.data || [];
-          const totalReviews = response.total || 0;
-          const averageRating = response.averageRating || 0;
-
-          // Update stats
-          document.getElementById('total-reviews').textContent = totalReviews;
-          document.getElementById('average-rating').textContent = averageRating.toFixed(1);
-          document.getElementById('reviews-count').textContent = `Showing ${reviews.length} of ${totalReviews} reviews`;
-
-          // Render reviews
-          if (reviews.length === 0) {
-            reviewsContainer.innerHTML = `
-              <div class="px-6 py-4 text-center text-gray-500">
-                <i class="far fa-star text-gray-400 text-xl mb-2"></i>
-                <p>No reviews yet</p>
-              </div>
-            `;
-            return;
+          const userInfoElement = document.getElementById('user-info');
+          if (userInfoElement) {
+            userInfoElement.textContent = `ID: ${user.UserId} ${user.FirstName} ${user.LastName} | ${userRole} Plan`;
           }
 
-          reviewsContainer.innerHTML = '';
-          reviews.forEach(review => {
-            const reviewDate = new Date(review.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            });
-
-            // Create star rating display
-            const stars = Array(5).fill().map((_, i) => 
-              i < review.rating ? 
-              '<i class="fas fa-star text-yellow-400"></i>' : 
-              '<i class="far fa-star text-gray-300"></i>'
-            ).join('');
-
-            const reviewElement = document.createElement('div');
-            reviewElement.className = 'px-6 py-4';
-            reviewElement.innerHTML = `
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <img class="h-10 w-10 rounded-full" src="${review.client?.profilePicture || `https://ui-avatars.com/api/?name=${review.client?.firstName}+${review.client?.lastName}`}" alt="${review.client?.firstName} ${review.client?.lastName}">
-                </div>
-                <div class="ml-4">
-                  <div class="flex items-center">
-                    <h4 class="text-sm font-medium text-gray-900">${review.client?.firstName} ${review.client?.lastName}</h4>
-                    <span class="ml-2 text-xs text-gray-500">${reviewDate}</span>
-                  </div>
-                  <div class="mt-1 flex items-center">
-                    <div class="flex">
-                      ${stars}
-                    </div>
-                    <span class="ml-2 text-sm text-gray-500">${review.rating}.0</span>
-                  </div>
-                  <div class="mt-2 text-sm text-gray-700">
-                    <p>${review.comment || 'No comment provided'}</p>
-                  </div>
-                  ${review.service ? `
-                  <div class="mt-2 text-xs">
-                    <span class="text-gray-500">For service:</span>
-                    <span class="ml-1 font-medium text-gray-700">${review.service.name}</span>
-                  </div>
-                  ` : ''}
-                </div>
-              </div>
-            `;
-            reviewsContainer.appendChild(reviewElement);
-          });
-
-          // Pagination controls
-          document.getElementById('prev-page').disabled = page <= 1;
-          document.getElementById('next-page').disabled = (page * limit) >= totalReviews;
-
-          document.getElementById('prev-page').onclick = () => page > 1 && loadReviews(page - 1, limit);
-          document.getElementById('next-page').onclick = () => (page * limit) < totalReviews && loadReviews(page + 1, limit);
-
-        } catch (error) {
-          console.error('Error loading reviews:', error);
-          document.getElementById('reviews-container').innerHTML = `
-            <div class="px-6 py-4 text-center text-red-500">
-              <i class="fas fa-exclamation-circle text-red-400 text-xl mb-2"></i>
-              <p>Error loading reviews. Please try again.</p>
-            </div>
-          `;
+          // Update avatar
+          const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0] + user.LastName[0])}`;
+          document.getElementById('user-avatar-img').src = avatarUrl;
+          document.getElementById('sidebar-user-avatar').src = avatarUrl;
+        } else {
+          console.log('No user found in localStorage');
+          window.location.href = '../login.html';
         }
-      };
+      } catch (error) {
+        console.error('Failed to load auth.js:', error);
+      }
 
-      // Initial load
-      loadReviews();
+      // Initialize reviews module
+      try {
+        const { initReviews } = await import('../../../assets/js/modules/reviews.js');
+        console.log('Reviews module loaded successfully');
+        await initReviews();
+      } catch (error) {
+        console.error('Failed to load reviews.js:', error);
+      }
     });
   </script>
 </body>

@@ -67,21 +67,24 @@ export function normalizeUser(user) {
   if (!user) return null;
   
   return {
-   
     UserId: user.UserId,
     Email: user.Email,
     FirstName: user.FirstName,
     LastName: user.LastName,
     Role: user.Role,
     ProfilePicture: user.ProfilePicture,
-    
-    
     id: user.UserId,
     email: user.Email,
     firstName: user.FirstName,
     lastName: user.LastName,
     role: user.Role,
-    profilePicture: user.ProfilePicture
+    profilePicture: user.ProfilePicture,
+    professionalInfo: {
+      title: user.Professional?.Title || null,
+      bio: user.Professional?.Bio || null,
+      hourlyRate: user.Professional?.HourlyRate || null,
+      location: user.Professional?.Location || null
+    }
   };
 }
 

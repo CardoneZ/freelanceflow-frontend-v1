@@ -92,11 +92,16 @@ export const usersAPI = {
     return handleResponse(response);
   },
 
-  async updateUser(userId, userData) {
+ updateUser: async (userId, userData) => {
+  try {
     const response = await fetch(`${API_BASE_URL}/users/${userId}`, 
       fetchConfig('PUT', userData));
-    return handleResponse(response);
-  },
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('API updateUser error:', error);
+    throw error;
+  }
+},
 
   async uploadProfilePicture(formData) {
     const token = localStorage.getItem('token');
@@ -128,8 +133,21 @@ export const professionalsAPI = {
 
   async getStats(professionalId) {
     const response = await fetch(`${API_BASE_URL}/professionals/${professionalId}/stats`, 
-      fetchConfig('GET'));
-    return handleResponse(response);
+        fetchConfig('GET'));
+    const data = await handleResponse(response);
+    
+    if (data.success && data.stats) {
+        return {
+            ...data,
+            stats: {
+                totalAppointments: parseInt(data.stats.totalAppointments) || 0,
+                totalEarnings: parseFloat(data.stats.totalEarnings) || 0,
+                averageRating: parseFloat(data.stats.averageRating) || 0,
+                upcomingToday: parseInt(data.stats.upcomingToday) || 0
+            }
+        };
+    }
+    return data;
   },
 
   async getServices(professionalId) {
@@ -261,23 +279,48 @@ export const appointmentsAPI = {
 
 // Availability API
 export const availabilityAPI = {
-  async create(professionalId, availabilityData) {
-    const response = await fetch(`${API_BASE_URL}/availability/${professionalId}`, 
-      fetchConfig('POST', { availability: availabilityData }));
-    return handleResponse(response);
-  },
-
-  async getProfessionalAvailability(professionalId, date, duration) {
-    const response = await fetch(`${API_BASE_URL}/availability/${professionalId}?date=${date}&duration=${duration}`, 
-      fetchConfig('GET'));
-    return handleResponse(response);
-  },
-
-  async update(professionalId, availabilityData) {
-    const response = await fetch(`${API_BASE_URL}/availability/${professionalId}`, 
-      fetchConfig('PUT', { availability: availabilityData }));
-    return handleResponse(response);
-  }
+    async getProfessionalAvailability(professionalId, date) {
+        const url = `${API_BASE_URL}/availability/${professionalId}?date=${date}&duration=60`;
+        console.log('Fetching availability from:', url); // Debug log
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        console.log('Availability API response:', data); // Debug log
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return data;
+    },
+    async create(professionalId, availabilityData) {
+    const url = `${API_BASE_URL}/availability/${professionalId}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ availability: availabilityData })
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        error.status = response.status;
+        error.data = errorData;
+        throw error;
+    }
+    
+    return response.json();
+},
+    async delete(professionalId, slotId) {
+        const url = `${API_BASE_URL}/availability/${professionalId}/${slotId}`;
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    }
 };
 
 // Reviews API
