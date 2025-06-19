@@ -194,7 +194,7 @@
     if (data.token) {
       localStorage.setItem('token', data.token); // Guarda el token
       console.log('Token saved:', data.token); // Para depuración
-      window.location.href = '/pages/auth/professional/appointments.html';
+      window.location.href = '/professional/dashboard.html';
     } else {
       alert('Login failed: ' + data.message);
     }
