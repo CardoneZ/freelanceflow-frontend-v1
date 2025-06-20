@@ -123,6 +123,18 @@ export const professionalsAPI = {
     return handleResponse(response);
   },
 
+  async getAllProfessionals(queryParams = {}) {
+  const params = new URLSearchParams(queryParams);
+  const response = await fetch(`${API_BASE_URL}/professionals/clients?${params}`, fetchConfig('GET'));
+  const professionals = await handleResponse(response);
+  const withStats = await Promise.all(professionals.map(async (p) => {
+    const stats = await professionalsAPI.getStats(p.ProfessionalId);
+    return { ...p, averageRating: stats.averageRating || 0 };
+  }));
+  
+  return withStats;
+  },
+
   async getById(id) {
     const response = await fetch(`${API_BASE_URL}/professionals/${id}`, 
       fetchConfig('GET'));
@@ -280,8 +292,40 @@ export const appointmentsAPI = {
       headers: getAuthHeader()
     });
     return handleResponse(response);
+  },
+
+  async create(appointmentData) {
+  const response = await fetch(`${API_BASE_URL}/appointments`, 
+    fetchConfig('POST', appointmentData));
+  
+  const data = await handleResponse(response);
+  
+  if (!data.success) {
+    throw new Error(data.message || 'Booking failed');
+  }
+  
+  return data;
+  },
+
+  async getClientAppointments(clientId, params = {}) {
+  const queryParams = new URLSearchParams({
+    ...params,
+    clientId
+  }).toString();
+  
+  const response = await fetch(`${API_BASE_URL}/appointments?${queryParams}`, 
+    fetchConfig('GET'));
+  return handleResponse(response);
+  },
+
+async cancel(id) {
+  const response = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, 
+    fetchConfig('PATCH'));
+  return handleResponse(response);
   }
 };
+
+
 
 // Availability API
 export const availabilityAPI = {
@@ -406,6 +450,11 @@ export const clientsAPI = {
     const response = await fetch(`${API_BASE_URL}/clients/${clientId}/appointments?${params}`, 
       fetchConfig('GET'));
     return handleResponse(response);
+  },
+  async getByUserId(userId) {
+  const response = await fetch(`${API_BASE_URL}/clients/user/${userId}`, 
+    fetchConfig('GET'));
+  return handleResponse(response);
   }
 };
 
@@ -413,6 +462,7 @@ function getAuthHeader() {
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
+
 
 // Exportación global para facilitar el acceso
 export default {

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceFlow | Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .smooth-transition { transition: all 0.3s ease; }
+    .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Stats card hover effect */
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm fixed w-full z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex-shrink-0 flex items-center">
+            <div class="flex items-center">
+              <div class="flex items-center">
+                <div class="ml-4 flex items-center md:ml-6">
+
+                  <div class="ml-3 relative">
+                    <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      <span class="sr-only">Open user menu</span>
+                      <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
+                      <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
+                      <i class="fas fa-chevron-down ml-1 text-gray-400 text-xs hidden md:inline-block"></i>
+                    </button>
+                    <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                      <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user mr-2 text-gray-400"></i>Your Profile</a>
+                      <a href="../logIn.html" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-sign-out-alt mr-2 text-gray-400"></i>Sign out</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <div class="sidebar bg-white w-64 fixed h-full overflow-y-auto z-20">
+    <div class="flex items-center justify-center h-16 border-b px-4">
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-md bg-primary-600 flex items-center justify-center">
+          <i class="fas fa-calendar-alt text-white text-sm"></i>
+        </div>
+        <span class="ml-2 text-lg font-semibold text-gray-800">FreelanceFlow</span>
+      </div>
+    </div>
+    <div class="mt-6 px-4">
+      <div class="flex items-center px-4 py-3 bg-primary-50 rounded-lg">
+        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-700" id="sidebar-user-name">Loading...</p>
+          <p class="text-xs text-gray-500">Professional Plan</p>
+        </div>
+      </div>
+    </div>
+    <nav class="mt-6 px-2">
+      <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium text-primary-700 bg-primary-50 rounded-lg">
+        <i class="fas fa-tachometer-alt mr-3 text-primary-600 w-5 text-center"></i>Dashboard
+      </a>
+      <a href="appointments.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-calendar-alt mr-3 text-gray-500 w-5 text-center"></i>Appointments
+      </a>
+      <a href="servicesClient.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="fas fa-tasks mr-3 text-gray-500 w-5 text-center"></i>Services
+      </a>
+      <a href="availability.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-clock mr-3 text-gray-500 w-5 text-center"></i>Availability
+      </a>
+      <a href="reviews.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-star mr-3 text-gray-500 w-5 text-center"></i>Reviews
+      </a>
+      <div class="px-2 py-4 border-t mt-4">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider px-2 mb-2">Settings</p>
+        <a href="profile.html" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-user mr-3 text-gray-500 w-5 text-center"></i>Profile
+        </a>
+       <a href="#" id="sidebar-logout-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-sign-out-alt mr-3 text-gray-500 w-5 text-center"></i>Sign Out
+      </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">
+      <!-- Page Heading -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p class="mt-2 text-sm text-gray-500" id="welcome-message">Loading...</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8" id="stats-cards">
+        <!-- Will be loaded dynamically -->
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all duration-200">
+          <div class="flex items-center">
+            <div class="p-3 rounded-lg bg-primary-50 text-primary-600">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500 truncate">Total Appointments</p>
+              <p class="mt-1 text-2xl font-semibold text-gray-900">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Upcoming Appointments -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Upcoming Appointments</h3>
+            <p class="mt-1 text-sm text-gray-500">Your next 5 appointments</p>
+          </div>
+          <ul class="divide-y divide-gray-200" id="upcoming-appointments">
+            <li class="px-6 py-4 text-center text-gray-500">Loading appointments...</li>
+          </ul>
+          <div class="px-6 py-4 border-t border-gray-200 text-right">
+            <a href="appointmentsClient.html" class="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline">View all</a>
+          </div>
+        </div>
+
+        <!-- Recent Reviews & My Services -->
+        <div class="space-y-6">
+          <!-- Recent Reviews -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Recent Reviews</h3>
+            </div>
+            <ul class="divide-y divide-gray-200" id="recent-reviews">
+              <li class="px-6 py-4 text-center text-gray-500">Loading reviews...</li>
+            </ul>
+            <div class="px-6 py-4 border-t border-gray-200 text-right">
+              <a href="reviews.html" class="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline">View all</a>
+            </div>
+          </div>
+
+          <!-- My Services -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-900">My Services</h3>
+              <a href="services.html" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-primary-600 hover:bg-primary-700">
+                Manage
+              </a>
+            </div>
+            <ul class="divide-y divide-gray-200" id="my-services">
+              <li class="px-6 py-4 text-center text-gray-500">Loading services...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initDashboard } from '/assets/js/modules/dashboard.js';
+    import { getCurrentUser, logout } from '/assets/js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+      });
+      
+      // User dropdown
+      document.getElementById('user-menu-button').addEventListener('click', () => {
+        document.querySelector('[role="menu"]').classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', event => {
+        if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+          document.querySelector('[role="menu"]').classList.add('hidden');
+        }
+      });
+
+      
+    function handleLogout() {
+      
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      
+      window.location.href = '../login.html';
+    }
+
+// Add event listeners for both logout buttons
+document.getElementById('logout-btn').addEventListener('click', (e) => {
+  e.preventDefault();
+  handleLogout();
+});
+
+document.getElementById('sidebar-logout-btn').addEventListener('click', (e) => {
+  e.preventDefault();
+  handleLogout();
+});
+
+    // Update user info with logged-in user
+    try {
+      const { getCurrentUser } = await import('../../../assets/js/auth.js');
+      const user = getCurrentUser();
+      if (user) {
+        const userName = `${user.FirstName} ${user.LastName}`;
+        const userRole = user.Role || 'Professional';
+
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('sidebar-user-name').textContent = userName;
+
+        const userInfoElement = document.getElementById('user-info');
+        if (userInfoElement) {
+          userInfoElement.textContent = `ID: ${user.UserId} ${user.FirstName} ${user.LastName} | ${userRole} Plan`;
+        }
+
+        const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0] + user.LastName[0])}`;
+        document.getElementById('user-avatar-img').src = avatarUrl;
+        document.getElementById('sidebar-user-avatar').src = avatarUrl;
+      } else {
+        console.log('No user found in localStorage');
+        window.location.href = '../login.html';
+      }
+    } catch (error) {
+      console.error('Failed to load auth.js:', error);
+    }
+    try {
+      const { initDashboard } = await import('../../../assets/js/modules/dashboard.js');
+      console.log('Dashboard module loaded successfully');
+      await initDashboard();
+    } catch (error) {
+      console.error('Failed to load dashboard.js:', error);
+    }
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceFlow | Services</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .smooth-transition { transition: all 0.3s ease; }
+    .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Modal animation */
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-animate {
+      animation: modalFadeIn 0.2s ease-out forwards;
+    }
+    
+    /* Custom checkbox */
+    .custom-checkbox {
+      position: relative;
+      padding-left: 28px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .custom-checkbox input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: white;
+      border: 2px solid #d1d5db;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .custom-checkbox:hover input ~ .checkmark {
+      border-color: #9ca3af;
+    }
+    .custom-checkbox input:checked ~ .checkmark {
+      background-color: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+    .custom-checkbox input:checked ~ .checkmark:after {
+      display: block;
+    }
+    .custom-checkbox .checkmark:after {
+      left: 6px;
+      top: 2px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm fixed w-full z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex-shrink-0 flex items-center">
+            <div class="flex items-center">
+              <div class="flex items-center">
+                <div class="ml-4 flex items-center md:ml-6">
+
+                  <div class="ml-3 relative">
+                    <button id="user-menu-button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      <span class="sr-only">Open user menu</span>
+                      <img class="h-8 w-8 rounded-full" id="user-avatar-img" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
+                      <span class="ml-2 hidden md:inline-block" id="user-name">Loading...</span>
+                      <i class="fas fa-chevron-down ml-1 text-gray-400 text-xs hidden md:inline-block"></i>
+                    </button>
+                    <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                      <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user mr-2 text-gray-400"></i>Your Profile</a>
+                      <a href="../logIn.html" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-sign-out-alt mr-2 text-gray-400"></i>Sign out</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <div class="sidebar bg-white w-64 fixed h-full overflow-y-auto z-20">
+    <div class="flex items-center justify-center h-16 border-b px-4">
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-md bg-primary-600 flex items-center justify-center">
+          <i class="fas fa-calendar-alt text-white text-sm"></i>
+        </div>
+        <span class="ml-2 text-lg font-semibold text-gray-800">FreelanceFlow</span>
+      </div>
+    </div>
+    <div class="mt-6 px-4">
+      <div class="flex items-center px-4 py-3 bg-primary-50 rounded-lg">
+        <img class="h-10 w-10 rounded-full" id="sidebar-user-avatar" src="https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=JD" alt="">
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-700" id="sidebar-user-name">Loading...</p>
+          <p class="text-xs text-gray-500">Client Plan</p>
+        </div>
+      </div>
+    </div>
+    <nav class="mt-6 px-2">
+      <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="fas fa-tachometer-alt mr-3 text-gray-500 w-5 text-center"></i>Dashboard
+      </a>
+      <a href="appointmentsClient.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-calendar-alt mr-3 text-gray-500 w-5 text-center"></i>Appointments
+      </a>
+      <a href="services.html" class="flex items-center px-4 py-3 text-sm font-medium text-primary-700 bg-primary-50 rounded-lg">
+        <i class="fas fa-tasks mr-3 text-primary-600 w-5 text-center"></i>Services
+      </a>
+      <a href="reviews.html" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+        <i class="far fa-star mr-3 text-gray-500 w-5 text-center"></i>Reviews
+      </a>
+      <div class="px-2 py-4 border-t mt-4">
+        <a href="profile.html" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-user mr-3 text-gray-500 w-5 text-center"></i>Profile
+        </a>
+        <a href="../logIn.html" id="sidebar-logout-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-sign-out-alt mr-3 text-gray-500 w-5 text-center"></i>Sign Out
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">
+      
+      <!-- Heading -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Find Professionals</h1>
+          <p class="mt-2 text-sm text-gray-500">Search for professionals by service or location</p>
+        </div>
+      </div>
+
+      <!-- Search Filters -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+            <input type="text" id="service-search" placeholder="e.g. Haircut" class="w-full border-gray-300 rounded-md shadow-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" id="location-search" placeholder="e.g. New York" class="w-full border-gray-300 rounded-md shadow-sm">
+          </div>
+          <div class="flex items-end">
+            <button id="search-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Search</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Professional</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="search-results" class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                  <i class="fas fa-search text-gray-400 text-xl mb-2"></i>
+                  <p>No search results yet</p>
+                  <p class="text-xs mt-1">Use the search filters above to find professionals</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Update the modal closing button with an event listener -->
+<div id="booking-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl relative">
+    <button type="button" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onclick="document.getElementById('booking-modal').classList.add('hidden')">×</button>
+    <h2 class="text-xl font-bold mb-4">Book Appointment</h2>
+    <div id="booking-content">
+      <!-- Dynamic content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+  <!-- Module Scripts -->
+<script type="module" src="/assets/js/auth.js"></script>
+<script type="module">
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Current document URL:', document.URL);
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('open');
+    });
+
+    // User dropdown
+    document.getElementById('user-menu-button').addEventListener('click', () => {
+      document.querySelector('[role="menu"]').classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#user-menu-button') && !event.target.closest('[role="menu"]')) {
+        document.querySelector('[role="menu"]').classList.add('hidden');
+      }
+    });
+
+    // Logout
+    function logout() {
+      console.log('Logging out...');
+      window.location.href = '../login.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
+    // Update user info with logged-in user
+    try {
+      const { getCurrentUser } = await import('../../../assets/js/auth.js');
+      const user = getCurrentUser();
+      if (user) {
+        const userName = `${user.FirstName} ${user.LastName}`;
+        const userRole = user.Role || 'Client';
+
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('sidebar-user-name').textContent = userName;
+
+        const userInfoElement = document.getElementById('user-info');
+        if (userInfoElement) {
+          userInfoElement.textContent = `ID: ${user.UserId} ${user.FirstName} ${user.LastName} | ${userRole} Plan`;
+        }
+
+        // Actualizar avatar
+        const avatarUrl = user.ProfilePicture || `https://ui-avatars.com/api/?background=0ea5e9&color=fff&name=${encodeURIComponent(user.FirstName[0] + user.LastName[0])}`;
+        document.getElementById('user-avatar-img').src = avatarUrl;
+        document.getElementById('sidebar-user-avatar').src = avatarUrl;
+      } else {
+        console.log('No user found in localStorage');
+        window.location.href = '../login.html';
+      }
+    } catch (error) {
+      console.error('Failed to load auth.js:', error);
+    }
+
+    // Initialize services module
+    try {
+      const { initServicesClient } = await import('../../../assets/js/modules/client/servicesClient.js');
+      console.log('Services module loaded successfully');
+      await initServicesClient();
+    } catch (error) {
+      console.error('Failed to load services.js:', error);
+    }
+  });
+</script>
+
+</body>
+</html>

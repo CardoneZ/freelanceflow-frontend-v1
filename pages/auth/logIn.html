@@ -145,7 +145,7 @@
                     if (user.Role === 'professional') {
                         window.location.href = '/pages/auth/professional/dashboard.html';
                     } else {
-                        window.location.href = '/pages/auth/client/clientDashboard.html';
+                        window.location.href = '/pages/auth/client/dashboard.html';
                     }
                 } catch (error) {
                     // Show error
@@ -169,7 +169,7 @@
                     if (user) {
                         const redirectPath = user.Role === 'professional' 
                             ? '/pages/auth/professional/dashboard.html'
-                            : '/pages/auth/client/clientDashboard.html';
+                            : '/pages/auth/client/dashboard.html';
                         window.location.href = redirectPath;
                     }
                 }
@@ -179,28 +179,5 @@
             checkAuthAndRedirect();
         });
     </script>
-
-    <script>
-  document.querySelector('form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const response = await fetch('http://localhost:4000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Email: email, Password: password }),
-    });
-    const data = await response.json();
-    if (data.token) {
-      localStorage.setItem('token', data.token); // Guarda el token
-      console.log('Token saved:', data.token); // Para depuración
-      window.location.href = '/professional/dashboard.html';
-    } else {
-      alert('Login failed: ' + data.message);
-    }
-  });
-</script>
-
-
 </body>
 </html>
