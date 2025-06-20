@@ -145,7 +145,7 @@
                     if (user.Role === 'professional') {
                         window.location.href = '/pages/auth/professional/dashboard.html';
                     } else {
-                        window.location.href = '/pages/auth/client/dashboard.html';
+                        window.location.href = '/pages/auth/client/dashboardClient.html';
                     }
                 } catch (error) {
                     // Show error
@@ -169,7 +169,7 @@
                     if (user) {
                         const redirectPath = user.Role === 'professional' 
                             ? '/pages/auth/professional/dashboard.html'
-                            : '/pages/auth/client/dashboard.html';
+                            : '/pages/auth/client/dashboardClient.html';
                         window.location.href = redirectPath;
                     }
                 }
