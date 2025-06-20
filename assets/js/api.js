@@ -307,24 +307,58 @@ export const appointmentsAPI = {
   return data;
   },
 
-  async getClientAppointments(clientId, params = {}) {
-  const queryParams = new URLSearchParams({
-    ...params,
-    clientId
-  }).toString();
-  
-  const response = await fetch(`${API_BASE_URL}/appointments?${queryParams}`, 
-    fetchConfig('GET'));
-  return handleResponse(response);
-  },
+  async getClientAppointments(userId, params = {}) {
+  try {
+    // First get the ClientId for this UserId
+    const clientData = await clientsAPI.getByUserId(userId);
+    
+    if (!clientData || !clientData.ClientId) {
+      throw new Error('No client profile found');
+    }
 
-async cancel(id) {
-  const response = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, 
-    fetchConfig('PATCH'));
-  return handleResponse(response);
+    const queryParams = new URLSearchParams({
+      ...params,
+      clientId: clientData.ClientId // Use the actual ClientId
+    }).toString();
+
+    const response = await fetch(`${API_BASE_URL}/appointments?${queryParams}`, {
+      headers: getAuthHeader(),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in getClientAppointments:', error);
+    throw error;
+  }
+},
+
+  async cancel(id) {
+  const response = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, {
+    method: 'PATCH',
+    headers: getAuthHeader(),
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || `Failed to cancel appointment: ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  
+  return await response.json();
   }
 };
 
+function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
 
 
 // Availability API
@@ -457,12 +491,6 @@ export const clientsAPI = {
   return handleResponse(response);
   }
 };
-
-function getAuthHeader() {
-  const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-}
-
 
 // Exportación global para facilitar el acceso
 export default {
